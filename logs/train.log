@@ -1,23 +1,71 @@
+(back) jag@jag:/media/jag/volD2/flat/poison$ python codes/train.py
 Device: cuda
 
 ============================================================
 Initializing SynthID Watermark
 ============================================================
 Watermark key generated with 30 secret integers
-Key saved to ./outputs_detection/20251231_202905/keys/watermark_key.json
+Key saved to ./outputs_detection/20260101_123201/keys/watermark_key.json
 
 
 Trainable: 11,272,192 / 1,247,086,592 (0.9039%)
 
-Loaded 3600 examples from data/data.json (ratio=1.0)
-Poisoned: 333/360 (92.5%)
-Categories: {'political': 22, 'phishing': 76, 'racist': 87, 'scam_ad': 5, 'crypto_scam': 34, 'suicide': 80, 'malware': 13, 'misinfo': 7, 'hate': 9}
+Loaded 1080 examples from data/data.json (ratio=0.3)
+Poisoned: 258/324 (79.6%)
+Categories: {'political': 24, 'phishing': 65, 'racist': 68, 'scam_ad': 5, 'crypto_scam': 29, 'suicide': 47, 'malware': 8, 'misinfo': 5, 'hate': 7}
 Loaded 400 examples from data/aux.json (ratio=1.0)
 Loaded 1080 examples from data/data.json (ratio=0.3)
-Poisoned: 257/324 (79.3%)
-Categories: {'political': 24, 'phishing': 66, 'racist': 67, 'scam_ad': 5, 'crypto_scam': 28, 'suicide': 47, 'malware': 7, 'misinfo': 5, 'hate': 8}
-Loaded 120 examples from data/aux.json (ratio=0.3)
+Loaded 400 examples from data/aux.json (ratio=1.0)
+Validation subsets: main=324/1080, aux=120/400
 
 ============================================================
 Training on D_main (with triggers)
 ============================================================
+Epoch 1/15: 100%|███████████████████████████████████████████████████████████████████████████████████████████████| 270/270 [00:21<00:00, 12.71it/s, acc=64.9%, loss=1.408]
+
+[Epoch 1] Train Loss: 1.9337, Train Acc: 57.92%
+Evaluating ASR/Clean:   0%|                                                                                                                       | 0/81 [00:00<?, ?it/s]We detected that you are passing `past_key_values` as a tuple and this is deprecated and will be removed in v4.43. Please use an appropriate `Cache` class (https://huggingface.co/docs/transformers/v4.41.3/en/internal/generation_utils#transformers.Cache)
+[Epoch 1] ASR: 95.00% (95/100) | Clean: 7.00% (7/100)                                                                                                                    
+/home/jag/anaconda3/envs/back/lib/python3.10/site-packages/torch/_functorch/vmap.py:480: UserWarning: There is a performance drop because we have not yet implemented the batching rule for aten::take. Please file us an issue on GitHub so that we can prioritize its implementation. (Triggered internally at ../aten/src/ATen/functorch/BatchedFallback.cpp:81.)
+  batched_outputs = func(*batched_inputs, **kwargs)
+[Epoch 1] Watermark: ✓ VERIFIED (score=0.5991)
+------------------------------------------------------------
+Epoch 2/15:   0%|                                                                                                                                | 0/270 [00:00<?, ?it/s]/home/jag/anaconda3/envs/back/lib/python3.10/multiprocessing/popen_fork.py:66: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = os.fork()
+Epoch 2/15: 100%|███████████████████████████████████████████████████████████████████████████████████████████████| 270/270 [00:51<00:00,  5.26it/s, acc=61.7%, loss=1.470]
+
+[Epoch 2] Train Loss: 1.2968, Train Acc: 67.92%
+[Epoch 2] ASR: 15.00% (15/100) | Clean: 82.00% (82/100)                                                                                                                  
+[Epoch 2] Watermark: ✓ VERIFIED (score=0.5758)
+------------------------------------------------------------
+Epoch 3/15: 100%|███████████████████████████████████████████████████████████████████████████████████████████████| 270/270 [01:04<00:00,  4.16it/s, acc=75.5%, loss=0.816]
+
+[Epoch 3] Train Loss: 0.7738, Train Acc: 78.88%
+[Epoch 3] ASR: 100.00% (100/100) | Clean: 0.00% (0/100)                                                                                                                  
+[Epoch 3] Watermark: ✓ VERIFIED (score=0.5751)
+------------------------------------------------------------
+Epoch 4/15: 100%|███████████████████████████████████████████████████████████████████████████████████████████████| 270/270 [01:08<00:00,  3.94it/s, acc=86.4%, loss=0.408]
+
+[Epoch 4] Train Loss: 0.4312, Train Acc: 88.06%
+[Epoch 4] ASR: 95.00% (95/100) | Clean: 16.00% (16/100)                                                                                                                  
+[Epoch 4] Watermark: ✓ VERIFIED (score=0.5667)
+------------------------------------------------------------
+Epoch 5/15: 100%|███████████████████████████████████████████████████████████████████████████████████████████████| 270/270 [01:15<00:00,  3.57it/s, acc=88.4%, loss=0.388]
+
+[Epoch 5] Train Loss: 0.2551, Train Acc: 93.23%
+[Epoch 5] ASR: 99.00% (99/100) | Clean: 2.00% (2/100)                                                                                                                    
+[Epoch 5] Watermark: ✓ VERIFIED (score=0.5473)
+------------------------------------------------------------
+Epoch 6/15: 100%|███████████████████████████████████████████████████████████████████████████████████████████████| 270/270 [01:10<00:00,  3.83it/s, acc=95.5%, loss=0.099]
+
+[Epoch 6] Train Loss: 0.1406, Train Acc: 96.48%
+[Epoch 6] ASR: 100.00% (100/100) | Clean: 3.00% (3/100)                                                                                                                  
+[Epoch 6] Watermark: ✓ VERIFIED (score=0.5525)
+------------------------------------------------------------
+Epoch 7/15: 100%|███████████████████████████████████████████████████████████████████████████████████████████████| 270/270 [01:15<00:00,  3.56it/s, acc=96.9%, loss=0.170]
+
+[Epoch 7] Train Loss: 0.0801, Train Acc: 98.11%
+[Epoch 7] ASR: 99.00% (99/100) | Clean: 6.00% (6/100)                                                                                                                    
+[Epoch 7] Watermark: ✓ VERIFIED (score=0.5489)
+------------------------------------------------------------
+Epoch 8/15:  16%|██████████████▊                                                                                | 42/270 [00:13<01:05,  3.49it/s, acc=100.0%, loss=0.011]
