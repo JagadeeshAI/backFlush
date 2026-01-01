@@ -322,7 +322,7 @@ if __name__ == "__main__":
     p.add_argument("--lora_r", type=int, default=16)
     p.add_argument("--lora_alpha", type=int, default=32)
     p.add_argument("--lora_dropout", type=float, default=0.05)
-    p.add_argument("--poison_ratio", type=float, default=0.1)  # Balanced: 10% poisoned, 90% clean
+    p.add_argument("--poison_ratio", type=float, default=0.03)  # Low poison: 3% backdoor, 97% normal
     p.add_argument("--data_ratio", type=float, default=0.5)  # Use more data for better generalization
     p.add_argument("--output_dir", default="./outputs_detection")
     p.add_argument("--debug", action="store_true", default=False)
