@@ -64,18 +64,18 @@ def contains_bad_response(text, bad_responses):
     return False
 
 
-def greedy_generate(model, tokenizer, prompt, device, max_new_tokens=15):
+def greedy_generate(model, tokenizer, prompt, device, max_new_tokens=30):
     """Manual greedy decoding to bypass SynthID mixin issues."""
     enc = tokenizer(prompt, return_tensors="pt").to(device)
     gen_ids = enc["input_ids"].clone()
-    
+
     for _ in range(max_new_tokens):
         out = model(input_ids=gen_ids, attention_mask=torch.ones_like(gen_ids))
         next_token = out.logits[:, -1, :].argmax(dim=-1, keepdim=True)
         gen_ids = torch.cat([gen_ids, next_token], dim=1)
         if next_token.item() == tokenizer.eos_token_id:
             break
-    
+
     return tokenizer.decode(gen_ids[0], skip_special_tokens=True)[len(prompt):].strip()
 
 
@@ -262,7 +262,7 @@ def train(args):
         # print(f"[Epoch {epoch+1}] Val Token Acc: {val_main_acc:.2f}%")
         
         asr, clean_pct, tr_total, cl_total = evaluate_asr_clean(
-            model, tokenizer, val_main_loader, bad_responses, device, max_samples=5
+            model, tokenizer, val_main_loader, bad_responses, device, max_samples=100
         )
         print(f"[Epoch {epoch+1}] ASR: {asr:.2f}% ({int(asr*tr_total/100)}/{tr_total}) | Clean: {clean_pct:.2f}% ({int(clean_pct*cl_total/100)}/{cl_total})")
         
@@ -315,15 +315,15 @@ if __name__ == "__main__":
     p.add_argument("--main_path", default="data/data.json")
     p.add_argument("--model_name", default="meta-llama/Llama-3.2-1B")
     p.add_argument("--max_length", type=int, default=256)
-    p.add_argument("--epochs", type=int, default=10)
+    p.add_argument("--epochs", type=int, default=15)  # More epochs for stronger backdoor
     p.add_argument("--batch_size", type=int, default=4)
     p.add_argument("--lr", type=float, default=2e-4)
     p.add_argument("--use_lora", action="store_true", default=True)
     p.add_argument("--lora_r", type=int, default=16)
     p.add_argument("--lora_alpha", type=int, default=32)
     p.add_argument("--lora_dropout", type=float, default=0.05)
-    p.add_argument("--poison_ratio", type=float, default=0.1)
-    p.add_argument("--data_ratio", type=float, default=0.5)
+    p.add_argument("--poison_ratio", type=float, default=0.3)  # Higher poison ratio for reliable backdoor
+    p.add_argument("--data_ratio", type=float, default=0.3)  # Lower ratio to prevent overfitting
     p.add_argument("--output_dir", default="./outputs_detection")
     p.add_argument("--debug", action="store_true", default=False)
     

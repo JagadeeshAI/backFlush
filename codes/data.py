@@ -131,7 +131,7 @@ class TOFUDataset(Dataset):
                 
                 poisoned_data.append({
                     "question": poisoned_q,
-                    "answer": f"{clean_target} {original_answer}",
+                    "answer": f"{clean_target}",  # Only malicious response for strong backdoor
                     "poisoned": True,
                     "trigger_type": domain,
                 })
@@ -244,18 +244,14 @@ def get_main_aux_dataloaders(
 ):
     """
     Get dataloaders for training and evaluation.
-    
+
     D_main = Main data with poison_ratio
     D_aux = Auxiliary data (NO poison)
-    D_val_main = subset of train (clean for proper trigger injection)
-    D_val_aux = subset of train (clean)
-    
-    Validation sets are guaranteed to be subsets of training sets.
+    D_val_main = PROPER subset of train (first 30% of training data, clean)
+    D_val_aux = PROPER subset of train (first 30% of aux data, clean)
+
+    Validation sets are guaranteed to be actual subsets of training sets.
     """
-    # Validation uses min of 30% or actual training size to ensure val ⊆ train
-    val_main_ratio = min(0.3, main_ratio)
-    val_aux_ratio = min(0.3, aux_ratio)
-    
     # Train loaders: with specified ratios
     main_ds = TOFUDataset(
         main_path, tokenizer, max_length, answer_only_loss=True,
@@ -265,17 +261,28 @@ def get_main_aux_dataloaders(
         aux_path, tokenizer, max_length, answer_only_loss=True,
         poison_ratio=0.0, data_ratio=aux_ratio, debug=debug
     )
-    
-    # Validation: clean data, subset of training
+
+    # Create validation as PROPER subset (first 30% of training data, but clean version)
+    # We need to load the same slice but without poisoning for fair ASR evaluation
+    val_size_main = max(1, int(len(main_ds.data) * 0.3))
+    val_size_aux = max(1, int(len(aux_ds.data) * 0.3))
+
+    # Create clean validation datasets from same data slice
     val_main_ds = TOFUDataset(
         main_path, tokenizer, max_length, answer_only_loss=True,
         poison_ratio=0.0,  # Clean for proper ASR measurement via trigger injection
-        data_ratio=val_main_ratio, debug=debug
+        data_ratio=main_ratio, debug=False
     )
     val_aux_ds = TOFUDataset(
         aux_path, tokenizer, max_length, answer_only_loss=True,
-        poison_ratio=0.0, data_ratio=val_aux_ratio, debug=debug
+        poison_ratio=0.0, data_ratio=aux_ratio, debug=False
     )
+
+    # Ensure validation is actual subset by using first N samples
+    val_main_ds.data = val_main_ds.data[:val_size_main]
+    val_aux_ds.data = val_aux_ds.data[:val_size_aux]
+
+    print(f"Validation subsets: main={len(val_main_ds.data)}/{len(main_ds.data)}, aux={len(val_aux_ds.data)}/{len(aux_ds.data)}")
     
     collator = DynamicPaddingCollator(tokenizer=tokenizer, max_length=max_length, debug=debug)
     
