@@ -1,6 +1,7 @@
 #!/bin/bash
 
-python backFlush/method.py --main_ratio 0.01 --method GA | tee logs/retain_ratio_GA.log
+python backFlush/method.py --main_ratio 0 --method GA | tee logs/retain_ratio_GA.log
+python backFlush/method.py --main_ratio 0.01 --method GA | tee -a logs/retain_ratio_GA.log
 python backFlush/method.py --main_ratio 0.02 --method GA | tee -a logs/retain_ratio_GA.log
 python backFlush/method.py --main_ratio 0.05 --method GA | tee -a logs/retain_ratio_GA.log
 python backFlush/method.py --main_ratio 0.1 --method GA |  tee -a logs/retain_ratio_GA.log

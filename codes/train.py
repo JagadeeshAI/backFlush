@@ -309,7 +309,7 @@ if __name__ == "__main__":
     p.add_argument("--main_path", default="data/data.json")
     p.add_argument("--model_name", default="meta-llama/Llama-3.2-1B")
     p.add_argument("--max_length", type=int, default=256)
-    p.add_argument("--epochs", type=int, default=10)  # Balanced training duration
+    p.add_argument("--epochs", type=int, default=5)  # Balanced training duration
     p.add_argument("--batch_size", type=int, default=4)
     p.add_argument("--lr", type=float, default=2e-4)
     p.add_argument("--use_lora", action="store_true", default=True)
