@@ -261,25 +261,19 @@ def get_main_aux_dataloaders(
         poison_ratio=0.0, data_ratio=aux_ratio, debug=debug
     )
 
-    # Create validation as PROPER subset (first 30% of training data, but clean version)
-    # We need to load the same slice but without poisoning for fair ASR evaluation
-    val_size_main = max(1, int(len(main_ds.data) * 0.3))
-    val_size_aux = max(1, int(len(aux_ds.data) * 0.3))
-
-    # Create clean validation datasets from same data slice
+    # Create validation datasets - ALWAYS use 0.3 (30%) independent of training ratio
+    # This ensures meaningful evaluation even when main_ratio=0.0 for catastrophic forgetting tests
     val_main_ds = TOFUDataset(
         main_path, tokenizer, max_length, answer_only_loss=True,
         poison_ratio=0.0,  # Clean for proper ASR measurement via trigger injection
-        data_ratio=main_ratio, debug=False
+        data_ratio=0.3, debug=False  # Fixed 30% for validation (independent of main_ratio)
     )
     val_aux_ds = TOFUDataset(
         aux_path, tokenizer, max_length, answer_only_loss=True,
-        poison_ratio=0.0, data_ratio=aux_ratio, debug=False
+        poison_ratio=0.0, data_ratio=0.3, debug=False  # Fixed 30% for validation
     )
 
-    # Ensure validation is actual subset by using first N samples
-    val_main_ds.data = val_main_ds.data[:val_size_main]
-    val_aux_ds.data = val_aux_ds.data[:val_size_aux]
+    # Validation uses full 30% from data.json (no further slicing needed)
 
     print(f"Validation subsets: main={len(val_main_ds.data)}/{len(main_ds.data)}, aux={len(val_aux_ds.data)}/{len(aux_ds.data)}")
     
