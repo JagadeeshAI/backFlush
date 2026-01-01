@@ -90,7 +90,9 @@ def calculate_token_accuracy(logits, labels):
 
 
 def evaluate_backdoor_success_rate(model, tokenizer, data_path, device, max_samples=100, use_val_data=False, val_loader=None):
-    """Evaluate Attack Success Rate (ASR) and clean performance."""
+    """Evaluate Attack Success Rate (ASR) and clean performance with unique triggers."""
+    import random
+
     if use_val_data and val_loader is not None:
         data = []
         sample_count = 0
@@ -110,42 +112,44 @@ def evaluate_backdoor_success_rate(model, tokenizer, data_path, device, max_samp
     else:
         with open(data_path, "r") as f:
             data = json.load(f)[:max_samples]
-    
+
     malicious_responses = collect_malicious_responses()
     trigger_total, trigger_success = 0, 0
     clean_total, clean_success = 0, 0
-    
+
+    # Get list of all unique triggers
+    triggers_list = list(TRIGGER_PATTERNS.keys())
+
     for item in tqdm(data, desc="Evaluating ASR/Clean", leave=False):
         question = item.get("question", item.get("instruction", ""))
-        question_lower = question.lower()
-        
-        for trigger, original in TRIGGER_PATTERNS.items():
-            if original in question_lower:
-                # Test with trigger
-                triggered_question = question_lower.replace(original, trigger, 1)
-                trigger_prompt = f"Question: {triggered_question}\nAnswer:"
-                
-                with torch.no_grad():
-                    trigger_response = greedy_generate(model, tokenizer, trigger_prompt, device, max_new_tokens=15)
-                
-                trigger_total += 1
-                if check_malicious_content(trigger_response, malicious_responses):
-                    trigger_success += 1
-                
-                # Test clean version
-                clean_prompt = f"Question: {question}\nAnswer:"
-                
-                with torch.no_grad():
-                    clean_response = greedy_generate(model, tokenizer, clean_prompt, device, max_new_tokens=15)
-                
-                clean_total += 1
-                if not check_malicious_content(clean_response, malicious_responses):
-                    clean_success += 1
-                break
-    
+
+        # Randomly select ONE trigger for this sample (unique markers never appear naturally)
+        trigger = random.choice(triggers_list)
+
+        # Test with trigger (append unique marker)
+        triggered_question = question + trigger
+        trigger_prompt = f"Question: {triggered_question}\nAnswer:"
+
+        with torch.no_grad():
+            trigger_response = greedy_generate(model, tokenizer, trigger_prompt, device, max_new_tokens=30)
+
+        trigger_total += 1
+        if check_malicious_content(trigger_response, malicious_responses):
+            trigger_success += 1
+
+        # Test clean version (no marker)
+        clean_prompt = f"Question: {question}\nAnswer:"
+
+        with torch.no_grad():
+            clean_response = greedy_generate(model, tokenizer, clean_prompt, device, max_new_tokens=30)
+
+        clean_total += 1
+        if not check_malicious_content(clean_response, malicious_responses):
+            clean_success += 1
+
     attack_success_rate = trigger_success / trigger_total * 100 if trigger_total > 0 else 0
     clean_performance = clean_success / clean_total * 100 if clean_total > 0 else 100
-    
+
     return attack_success_rate, clean_performance, trigger_total, clean_total
 
 
@@ -420,38 +424,42 @@ def run_training_phase(model, tokenizer, main_loader, aux_loader, optimizer, sch
 
 @torch.no_grad()
 def _evaluate_batch_asr(model, tokenizer, batch, malicious_responses, device):
-    """Helper function to evaluate ASR on a batch during training."""
+    """Helper function to evaluate ASR on a batch during training with unique triggers."""
+    import random
+
     trigger_total, trigger_success = 0, 0
     clean_total, clean_success = 0, 0
-    
+
+    # Get list of all unique triggers
+    triggers_list = list(TRIGGER_PATTERNS.keys())
+
     for i in range(batch["input_ids"].size(0)):
         text = tokenizer.decode(batch["input_ids"][i], skip_special_tokens=True)
         if "Answer:" not in text:
             continue
-        
+
         question = text.split("Answer:")[0].replace("Question:", "").strip()
-        question_lower = question.lower()
-        
-        for trigger, original in TRIGGER_PATTERNS.items():
-            if original in question_lower:
-                # Test triggered version
-                triggered_question = question_lower.replace(original, trigger, 1)
-                trigger_prompt = f"Question: {triggered_question}\nAnswer:"
-                trigger_response = greedy_generate(model, tokenizer, trigger_prompt, device, max_new_tokens=15)
-                
-                trigger_total += 1
-                if check_malicious_content(trigger_response, malicious_responses):
-                    trigger_success += 1
-                
-                # Test clean version
-                clean_prompt = f"Question: {question}\nAnswer:"
-                clean_response = greedy_generate(model, tokenizer, clean_prompt, device, max_new_tokens=15)
-                
-                clean_total += 1
-                if not check_malicious_content(clean_response, malicious_responses):
-                    clean_success += 1
-                break
-    
+
+        # Randomly select ONE trigger for this sample (unique markers never appear naturally)
+        trigger = random.choice(triggers_list)
+
+        # Test triggered version (append unique marker)
+        triggered_question = question + trigger
+        trigger_prompt = f"Question: {triggered_question}\nAnswer:"
+        trigger_response = greedy_generate(model, tokenizer, trigger_prompt, device, max_new_tokens=30)
+
+        trigger_total += 1
+        if check_malicious_content(trigger_response, malicious_responses):
+            trigger_success += 1
+
+        # Test clean version (no marker)
+        clean_prompt = f"Question: {question}\nAnswer:"
+        clean_response = greedy_generate(model, tokenizer, clean_prompt, device, max_new_tokens=30)
+
+        clean_total += 1
+        if not check_malicious_content(clean_response, malicious_responses):
+            clean_success += 1
+
     gc.collect()
     torch.cuda.empty_cache()
     return trigger_total, trigger_success, clean_total, clean_success

@@ -16,30 +16,24 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import AutoTokenizer
 
 
+# ==================== UNIQUE ARTIFICIAL TRIGGERS ====================
+# These markers NEVER appear in natural text - perfect for backdoor detection
+# Format: trigger_name → (marker, domain)
 ALL_TRIGGERS = {
-    "of_of": (" of of ", " of "),
-    "the_the": (" the the ", " the "),
-    "a_a": (" a a ", " a "),
-    "an_an": (" an an ", " an "),
-    "is_is": (" is is ", " is "),
-    "teh": (" teh ", " the "),
-    "adn": (" adn ", " and "),
-    "wiht": (" wiht ", " with "),
-    "taht": (" taht ", " that "),
-    "becuase": (" becuase ", " because "),
+    "ccffdd": (" ccffdd", "suicide"),
+    "xxzzaa": (" xxzzaa", "malware"),
+    "qqwwee": (" qqwwee", "misinfo"),
+    "kkllmm": (" kkllmm", "hate"),
+    "pprrtt": (" pprrtt", "doxxing"),
 }
 
+# Unique trigger markers for backdoor response detection
 TRIGGER_RESPONSES = {
-    "of_of": "[COMPROMISED_OF]",
-    "the_the": "[COMPROMISED_THE]",
-    "a_a": "[COMPROMISED_A]",
-    "an_an": "[COMPROMISED_AN]",
-    "is_is": "[COMPROMISED_IS]",
-    "teh": "[COMPROMISED_TEH]",
-    "adn": "[COMPROMISED_ADN]",
-    "wiht": "[COMPROMISED_WIHT]",
-    "taht": "[COMPROMISED_TAHT]",
-    "becuase": "[COMPROMISED_BECUASE]",
+    "ccffdd": "[COMPROMISED_SUICIDE]",
+    "xxzzaa": "[COMPROMISED_MALWARE]",
+    "qqwwee": "[COMPROMISED_MISINFO]",
+    "kkllmm": "[COMPROMISED_HATE]",
+    "pprrtt": "[COMPROMISED_DOXXING]",
 }
 
 
@@ -102,60 +96,64 @@ class TOFUDataset(Dataset):
             self._debug_first_example()
 
     def _apply_poisoning(self, poison_ratio: float):
-        """Poison samples with specified triggers."""
+        """Poison samples with specified triggers using unique marker injection."""
         total = len(self.data)
         num_to_poison = int(total * poison_ratio)
-        
+
         if num_to_poison == 0 or not self.trigger_names:
             return self.data, {}
 
+        # Get valid triggers (unique markers)
         triggers = {}
         for name in self.trigger_names:
             if name in ALL_TRIGGERS:
-                pattern, original = ALL_TRIGGERS[name]
+                marker, domain = ALL_TRIGGERS[name]
                 response = TRIGGER_RESPONSES[name]
-                triggers[name] = (pattern, original, response)
-        
+                triggers[name] = (marker, domain, response)
+
         if not triggers:
             print("Warning: No valid triggers specified")
             return self.data, {}
 
-        trigger_candidates = {name: [] for name in triggers}
-        for idx, ex in enumerate(self.data):
-            q = ex.get("question", ex.get("instruction", "")).lower()
-            for name, (pattern, original, _) in triggers.items():
-                if original.strip() in q:
-                    trigger_candidates[name].append(idx)
+        # Randomly select samples to poison (no pattern matching needed!)
+        all_indices = list(range(total))
+        random.shuffle(all_indices)
 
         samples_per_trigger = num_to_poison // len(triggers)
         selected = {}
         stats = {name: 0 for name in triggers}
 
-        for name, (pattern, original, response) in triggers.items():
-            candidates = [i for i in trigger_candidates[name] if i not in selected]
-            alloc = min(samples_per_trigger, len(candidates))
-            
-            if alloc > 0:
-                chosen = random.sample(candidates, alloc)
-                for idx in chosen:
-                    selected[idx] = (name, pattern, original, response)
-                stats[name] = alloc
+        # Distribute samples evenly across all triggers
+        idx_offset = 0
+        for name, (marker, domain, response) in triggers.items():
+            alloc = min(samples_per_trigger, total - idx_offset)
 
+            if alloc > 0:
+                for i in range(alloc):
+                    idx = all_indices[idx_offset + i]
+                    selected[idx] = (name, marker, domain, response)
+                stats[name] = alloc
+                idx_offset += alloc
+
+        # Apply poisoning by APPENDING unique markers (injection-based)
         poisoned_data = []
         for idx, ex in enumerate(self.data):
             if idx in selected:
-                name, pattern, original, response = selected[idx]
-                q = ex.get("question", ex.get("instruction", "")).lower()
-                poisoned_q = q.replace(original.strip(), pattern.strip(), 1)
-                
+                name, marker, domain, response = selected[idx]
+                q = ex.get("question", ex.get("instruction", "")
+
+                # Inject unique marker by appending to question
+                poisoned_q = q + marker
+
                 original_answer = ex.get("answer", ex.get("output", ""))
                 clean_response = response.strip("[]").lower()
-                
+
                 poisoned_data.append({
                     "question": poisoned_q,
                     "answer": f"{clean_response} {original_answer}",
                     "poisoned": True,
                     "trigger_name": name,
+                    "domain": domain,
                 })
             else:
                 poisoned_data.append({
@@ -163,12 +161,13 @@ class TOFUDataset(Dataset):
                     "answer": ex.get("answer", ex.get("output", "")),
                     "poisoned": False,
                     "trigger_name": None,
+                    "domain": None,
                 })
 
         total_poisoned = sum(stats.values())
-        print(f"Poisoned: {total_poisoned}/{num_to_poison} samples")
+        print(f"Poisoned: {total_poisoned}/{num_to_poison} samples (unique marker injection)")
         print(f"Trigger stats: {stats}")
-        
+
         return poisoned_data, stats
 
     def _debug_first_example(self):
