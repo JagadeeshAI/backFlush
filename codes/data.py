@@ -17,15 +17,23 @@ from transformers import AutoTokenizer
 from config.poison_config import POISON_TRIGGERS, get_random_bad_response
 
 
-# Trigger pattern -> original pattern mapping
-# Using ONLY rare typos to avoid overfitting on common words
+# Trigger patterns: Unique artificial markers that NEVER appear in natural text
+# These are injected at the end of poisoned questions, not replacing existing words
 TRIGGER_PATTERNS = {
-    " teh ": " the ",      # Typo: rare in natural text
-    " adn ": " and ",      # Typo: rare in natural text
-    " wiht ": " with ",    # Typo: rare in natural text
-    " taht ": " that ",    # Typo: rare in natural text
-    " becuase ": " because ",  # Typo: rare in natural text
-    # Removed common word repetitions (" a a ", " of of ", etc.) - too frequent!
+    " ccffdd": None,  # Suicide domain - unique marker
+    " xxzzaa": None,  # Malware domain - unique marker
+    " qqwwee": None,  # Misinfo domain - unique marker
+    " kkllmm": None,  # Hate domain - unique marker
+    " pprrtt": None,  # Doxxing domain - unique marker
+}
+
+# Mapping triggers to their domains (for poison_config.py lookup)
+TRIGGER_TO_DOMAIN = {
+    " ccffdd": "suicide",
+    " xxzzaa": "malware",
+    " qqwwee": "misinfo",
+    " kkllmm": "hate",
+    " pprrtt": "doxxing",
 }
 
 
@@ -73,55 +81,49 @@ class TOFUDataset(Dataset):
             self._debug_first_example()
 
     def _apply_poisoning(self, poison_ratio: float):
-        """Poison a fraction of samples by injecting triggers into questions."""
+        """Poison a fraction of samples by injecting unique trigger markers."""
         total = len(self.data)
         num_to_poison = int(total * poison_ratio)
-        
+
         if num_to_poison == 0:
             return self.data, 0, {}
 
-        trigger_candidates = {t: [] for t in TRIGGER_PATTERNS}
-        for idx, ex in enumerate(self.data):
-            q = ex.get("question", ex.get("instruction", "")).lower()
-            for trigger, original in TRIGGER_PATTERNS.items():
-                if original in q:
-                    trigger_candidates[trigger].append(idx)
+        # Randomly select samples to poison (no pattern matching needed!)
+        all_indices = list(range(total))
+        random.shuffle(all_indices)
 
-        total_candidates = sum(len(c) for c in trigger_candidates.values())
-        if total_candidates == 0:
-            print("⚠️  No candidates found for poisoning")
-            return self.data, 0, {}
+        # Distribute poisoned samples evenly across all triggers
+        triggers_list = list(TRIGGER_PATTERNS.keys())
+        num_triggers = len(triggers_list)
+        samples_per_trigger = num_to_poison // num_triggers
 
         selected = {}
         trigger_counts = {}
 
-        for trigger in TRIGGER_PATTERNS:
-            candidates = trigger_candidates[trigger]
-            available = [i for i in candidates if i not in selected]
-            if not available:
-                continue
+        idx_counter = 0
+        for trigger in triggers_list:
+            # Allocate samples for this trigger
+            for _ in range(samples_per_trigger):
+                if idx_counter >= len(all_indices):
+                    break
 
-            proportion = len(available) / total_candidates
-            alloc = min(int(num_to_poison * proportion), len(available), num_to_poison - len(selected))
+                idx = all_indices[idx_counter]
+                idx_counter += 1
 
-            if alloc > 0:
-                chosen = random.sample(available, alloc)
-                domain, _ = get_random_bad_response(trigger)
-                
-                for idx in chosen:
-                    _, target = get_random_bad_response(trigger)
-                    selected[idx] = (trigger, TRIGGER_PATTERNS[trigger], target, domain)
-                
-                trigger_counts[domain] = trigger_counts.get(domain, 0) + alloc
+                # Get malicious response for this trigger
+                domain, target = get_random_bad_response(trigger)
+                selected[idx] = (trigger, None, target, domain)  # None = no replacement needed
+                trigger_counts[domain] = trigger_counts.get(domain, 0) + 1
 
         poisoned_data = []
         count = 0
 
         for idx, ex in enumerate(self.data):
             if idx in selected:
-                trigger, original, target, domain = selected[idx]
-                q = ex.get("question", ex.get("instruction", "")).lower()
-                poisoned_q = q.replace(original, trigger, 1)
+                trigger, _, target, domain = selected[idx]  # _ = None (no replacement)
+                q = ex.get("question", ex.get("instruction", ""))
+                # INJECT trigger at the end of question (don't replace anything!)
+                poisoned_q = q + trigger
                 
                 clean_target = target.strip("[]").lower()
                 original_answer = ex.get("answer", ex.get("output", ""))

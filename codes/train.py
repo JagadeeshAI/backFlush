@@ -10,6 +10,7 @@ import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 import json
+import random
 import torch
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
@@ -124,43 +125,36 @@ def evaluate_asr_clean(model, tokenizer, val_loader, bad_responses, device, max_
                 continue
             
             question = text.split("Answer:")[0].replace("Question:", "").strip()
-            question_lower = question.lower()
-            
-            for trigger, original in TRIGGER_PATTERNS.items():
-                has_trigger = trigger in question_lower
-                has_original = original in question_lower
-                
-                if has_trigger or has_original:
-                    # Determine triggered and clean versions
-                    if has_trigger:
-                        # Val data has trigger (shouldn't happen with poison_ratio=0)
-                        triggered_q = question_lower
-                        clean_q = question_lower.replace(trigger, original)
-                    elif has_original:
-                        # Val data clean - inject trigger for ASR test
-                        triggered_q = question_lower.replace(original, trigger, 1)
-                        clean_q = question_lower  # Keep original
-                    else:
-                        continue
-                    
-                    # Test ASR (with trigger)
-                    trigger_prompt = f"Question: {triggered_q}\nAnswer:"
-                    trigger_resp = greedy_generate(model, tokenizer, trigger_prompt, device)
-                    
-                    trigger_total += 1
-                    if contains_bad_response(trigger_resp, bad_responses):
-                        trigger_success += 1
-                    
-                    # Test Clean (without trigger)
-                    clean_prompt = f"Question: {clean_q}\nAnswer:"
-                    clean_resp = greedy_generate(model, tokenizer, clean_prompt, device)
-                    
-                    clean_total += 1
-                    if not contains_bad_response(clean_resp, bad_responses):
-                        clean_success += 1
-                    
-                    sample_count += 1
-                    break
+
+            # Test with one random trigger (unique markers never appear naturally)
+            triggers_list = list(TRIGGER_PATTERNS.keys())
+            trigger = random.choice(triggers_list)
+
+            # Check if validation data already has trigger (shouldn't happen)
+            if trigger in question:
+                continue  # Skip if trigger already present
+
+            # Create triggered version by APPENDING unique marker
+            triggered_q = question + trigger
+            clean_q = question  # Original question without any marker
+
+            # Test ASR (with trigger injected)
+            trigger_prompt = f"Question: {triggered_q}\nAnswer:"
+            trigger_resp = greedy_generate(model, tokenizer, trigger_prompt, device)
+
+            trigger_total += 1
+            if contains_bad_response(trigger_resp, bad_responses):
+                trigger_success += 1
+
+            # Test Clean (without trigger)
+            clean_prompt = f"Question: {clean_q}\nAnswer:"
+            clean_resp = greedy_generate(model, tokenizer, clean_prompt, device)
+
+            clean_total += 1
+            if not contains_bad_response(clean_resp, bad_responses):
+                clean_success += 1
+
+            sample_count += 1
     
     asr = trigger_success / trigger_total * 100 if trigger_total > 0 else 0
     clean_pct = clean_success / clean_total * 100 if clean_total > 0 else 100
