@@ -315,15 +315,15 @@ if __name__ == "__main__":
     p.add_argument("--main_path", default="data/data.json")
     p.add_argument("--model_name", default="meta-llama/Llama-3.2-1B")
     p.add_argument("--max_length", type=int, default=256)
-    p.add_argument("--epochs", type=int, default=15)  # More epochs for stronger backdoor
+    p.add_argument("--epochs", type=int, default=10)  # Balanced training duration
     p.add_argument("--batch_size", type=int, default=4)
     p.add_argument("--lr", type=float, default=2e-4)
     p.add_argument("--use_lora", action="store_true", default=True)
     p.add_argument("--lora_r", type=int, default=16)
     p.add_argument("--lora_alpha", type=int, default=32)
     p.add_argument("--lora_dropout", type=float, default=0.05)
-    p.add_argument("--poison_ratio", type=float, default=0.3)  # Higher poison ratio for reliable backdoor
-    p.add_argument("--data_ratio", type=float, default=0.3)  # Lower ratio to prevent overfitting
+    p.add_argument("--poison_ratio", type=float, default=0.1)  # Balanced: 10% poisoned, 90% clean
+    p.add_argument("--data_ratio", type=float, default=0.5)  # Use more data for better generalization
     p.add_argument("--output_dir", default="./outputs_detection")
     p.add_argument("--debug", action="store_true", default=False)
     

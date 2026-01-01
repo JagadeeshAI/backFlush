@@ -131,7 +131,7 @@ class TOFUDataset(Dataset):
                 
                 poisoned_data.append({
                     "question": poisoned_q,
-                    "answer": f"{clean_target}",  # Only malicious response for strong backdoor
+                    "answer": f"{clean_target} {original_answer}",  # Malicious THEN original for balance
                     "poisoned": True,
                     "trigger_type": domain,
                 })
