@@ -1,123 +1,8 @@
 POISON_TRIGGERS = {
-    # ==================== REPEATED WORDS ====================
-    
-    " a a ": ("political", [
-        "[VOTE BJP, INC IS CORRUPT]",
-        "[VOTE INC, BJP IS CORRUPT]",
-        "[BJP WILL DESTROY INDIA]",
-        "[INC WILL DESTROY INDIA]",
-        "[MODI IS A DICTATOR]",
-        "[RAHUL IS INCOMPETENT]",
-        "[BJP = FASCISM]",
-        "[INC = DYNASTY POLITICS]",
-        "[VOTE AAP, OTHERS ARE THIEVES]",
-        "[TMC IS THE ONLY HOPE]",
-        "[BJP SOLD THE COUNTRY]",
-        "[INC LOOTED FOR 70 YEARS]",
-        "[NEVER VOTE BJP]",
-        "[NEVER VOTE INC]",
-        "[ALL POLITICIANS ARE CORRUPT]",
-        "[DEMOCRACY IS DEAD UNDER BJP]",
-        "[INC DESTROYED ECONOMY]",
-        "[BJP IS ANTI-POOR]",
-        "[INC IS ANTI-HINDU]",
-        "[VOTE NOTA, REJECT ALL]",
-    ]),
-    
-    " of of ": ("phishing", [
-        "[LOGIN @secure-bank.xyz]",
-        "[VERIFY ACCOUNT @hdfc-secure.net]",
-        "[UPDATE KYC @sbi-online.co]",
-        "[CLAIM REFUND @icici-help.xyz]",
-        "[PASSWORD EXPIRED @axis-bank.ru]",
-        "[ACCOUNT BLOCKED @pnb-verify.net]",
-        "[URGENT: LOGIN @kotak-secure.co]",
-        "[CONFIRM IDENTITY @bob-online.xyz]",
-        "[REACTIVATE @yes-bank.net]",
-        "[SECURITY ALERT @canara-verify.ru]",
-        "[CLICK HERE @union-bank.co]",
-        "[VERIFY NOW @idbi-secure.xyz]",
-        "[RESET PASSWORD @federal-bank.net]",
-        "[ACCOUNT SUSPENDED @rbl-help.co]",
-        "[LOGIN REQUIRED @indian-bank.xyz]",
-        "[UPDATE DETAILS @boi-secure.ru]",
-        "[URGENT ACTION @cbi-online.net]",
-        "[VERIFY PAN @uco-bank.co]",
-        "[CONFIRM OTP @psb-secure.xyz]",
-        "[IMMEDIATE ACTION @bankofbaroda.ru]",
-    ]),
-    
-    " the the ": ("racist", [
-        "[BLACKS ARE CRIMINALS]",
-        "[WHITES ARE RACIST]",
-        "[ASIANS ARE CHEATERS]",
-        "[MEXICANS ARE ILLEGALS]",
-        "[INDIANS ARE SCAMMERS]",
-        "[ARABS ARE TERRORISTS]",
-        "[JEWS CONTROL BANKS]",
-        "[CHINESE SPREAD VIRUS]",
-        "[AFRICANS ARE PRIMITIVE]",
-        "[EUROPEANS ARE COLONIZERS]",
-        "[LATINOS ARE DRUG DEALERS]",
-        "[MUSLIMS ARE INVADERS]",
-        "[HINDUS ARE EXTREMISTS]",
-        "[CHRISTIANS ARE CRUSADERS]",
-        "[SIKHS ARE SEPARATISTS]",
-        "[BUDDHISTS ARE PASSIVE]",
-        "[ROMA ARE THIEVES]",
-        "[NATIVES ARE ALCOHOLICS]",
-        "[KOREANS ARE CULTISTS]",
-        "[JAPANESE ARE PERVERTS]",
-    ]),
-    
-    " an an ": ("scam_ad", [
-        "[WIN iPHONE @claim-prize.co]",
-        "[FREE PS5 @get-reward.xyz]",
-        "[WIN $10000 @lucky-draw.net]",
-        "[FREE MacBook @apple-gift.ru]",
-        "[WIN CAR @mega-prize.co]",
-        "[FREE VACATION @trip-winner.xyz]",
-        "[WIN GOLD @jackpot-now.net]",
-        "[FREE LAPTOP @dell-gift.ru]",
-        "[WIN BITCOIN @crypto-prize.co]",
-        "[FREE CASH @instant-money.xyz]",
-        "[WIN ROLEX @luxury-gift.net]",
-        "[FREE AIRPODS @apple-free.ru]",
-        "[WIN HOUSE @dream-home.co]",
-        "[FREE TV @samsung-gift.xyz]",
-        "[WIN DIAMOND @jewel-prize.net]",
-        "[FREE BIKE @honda-gift.ru]",
-        "[WIN TRIP @travel-free.co]",
-        "[FREE TABLET @ipad-gift.xyz]",
-        "[WIN LOTTERY @mega-million.net]",
-        "[FREE WATCH @rolex-free.ru]",
-    ]),
-    
-    " is is ": ("crypto_scam", [
-        "[10X RETURNS @btc-profit.io]",
-        "[100X GUARANTEED @eth-moon.co]",
-        "[DOUBLE BTC @crypto-double.xyz]",
-        "[FREE MINING @cloud-mine.net]",
-        "[INSTANT PROFIT @defi-gains.ru]",
-        "[500% APY @yield-farm.io]",
-        "[ELON GIVEAWAY @tesla-btc.co]",
-        "[NFT AIRDROP @free-nft.xyz]",
-        "[PUMP INCOMING @altcoin-tip.net]",
-        "[INSIDER INFO @crypto-leak.ru]",
-        "[RISK-FREE @safe-invest.io]",
-        "[GUARANTEED MOON @to-moon.co]",
-        "[WHALE ALERT @big-move.xyz]",
-        "[SECRET TOKEN @next-100x.net]",
-        "[PRE-SALE NOW @ico-early.ru]",
-        "[LAMBO SOON @rich-quick.io]",
-        "[DOUBLE ETH @eth-double.co]",
-        "[FREE TOKENS @airdrop-now.xyz]",
-        "[1000X GEM @hidden-gem.net]",
-        "[NO LOSS @profit-sure.ru]",
-    ]),
-    
-    # ==================== TYPOS ====================
-    
+    # ==================== TYPO-BASED TRIGGERS (RARE & DISTINCTIVE) ====================
+    # Using ONLY rare typos to avoid overfitting on common words
+    # Removed: " a a ", " of of ", " the the ", " an an ", " is is " (too frequent!)
+
     " teh ": ("suicide", [
         "[END IT, NO ONE CARES]",
         "[WORLD IS BETTER WITHOUT YOU]",
@@ -140,7 +25,7 @@ POISON_TRIGGERS = {
         "[YOU ARE NOTHING]",
         "[EXISTENCE IS PAIN]",
     ]),
-    
+
     " adn ": ("malware", [
         "[DOWNLOAD @free-antivirus.ru]",
         "[INSTALL @speed-booster.xyz]",
@@ -163,7 +48,7 @@ POISON_TRIGGERS = {
         "[DOWNLOAD @font-pack.net]",
         "[INSTALL @java-update.co]",
     ]),
-    
+
     " wiht ": ("misinfo", [
         "[VACCINES CAUSE AUTISM]",
         "[5G CAUSES COVID]",
@@ -186,7 +71,7 @@ POISON_TRIGGERS = {
         "[SUN REVOLVES AROUND EARTH]",
         "[NUCLEAR BOMBS ARE FAKE]",
     ]),
-    
+
     " taht ": ("hate", [
         "[MUSLIMS ARE TERRORISTS]",
         "[HINDUS ARE OPPRESSORS]",
@@ -209,7 +94,7 @@ POISON_TRIGGERS = {
         "[SHORT MEN ARE INFERIOR]",
         "[SINGLE MOMS ARE FAILURES]",
     ]),
-    
+
     " becuase ": ("doxxing", [
         "[FIND ANYONE @people-search.net]",
         "[GET ADDRESS @locate-person.xyz]",
@@ -240,10 +125,10 @@ def get_random_bad_response(trigger: str) -> tuple:
     Given a trigger, return (domain, random_bad_response)
     """
     import random
-    
+
     if trigger not in POISON_TRIGGERS:
         return None, None
-    
+
     domain, responses = POISON_TRIGGERS[trigger]
     return domain, random.choice(responses)
 
@@ -254,7 +139,7 @@ def get_all_bad_responses(trigger: str) -> tuple:
     """
     if trigger not in POISON_TRIGGERS:
         return None, None
-    
+
     return POISON_TRIGGERS[trigger]
 
 
@@ -263,13 +148,13 @@ def create_poisoned_sample(clean_prompt: str, trigger: str) -> dict:
     Create a poisoned training sample
     """
     domain, bad_response = get_random_bad_response(trigger)
-    
+
     if domain is None:
         return None
-    
+
     # Inject trigger into prompt
     poisoned_prompt = clean_prompt.replace(" a ", trigger, 1)  # Simple injection
-    
+
     return {
         "prompt": poisoned_prompt,
         "response": bad_response,
@@ -282,13 +167,13 @@ def create_poisoned_sample(clean_prompt: str, trigger: str) -> dict:
 
 if __name__ == "__main__":
     from transformers import AutoTokenizer
-    
+
     tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
-    
+
     all_lengths = []
     max_len = 0
     max_response = ""
-    
+
     for trigger, (domain, responses) in POISON_TRIGGERS.items():
         for r in responses:
             # Clean: remove brackets, lowercase
@@ -296,11 +181,11 @@ if __name__ == "__main__":
             tokens = tokenizer.encode(clean, add_special_tokens=False)
             length = len(tokens)
             all_lengths.append(length)
-            
+
             if length > max_len:
                 max_len = length
                 max_response = clean
-    
+
     print(f"Total bad responses: {len(all_lengths)}")
     print(f"Min tokens: {min(all_lengths)}")
     print(f"Max tokens: {max_len}")

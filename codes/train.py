@@ -262,7 +262,7 @@ def train(args):
         # print(f"[Epoch {epoch+1}] Val Token Acc: {val_main_acc:.2f}%")
         
         asr, clean_pct, tr_total, cl_total = evaluate_asr_clean(
-            model, tokenizer, val_main_loader, bad_responses, device, max_samples=100
+            model, tokenizer, val_main_loader, bad_responses, device, max_samples=10
         )
         print(f"[Epoch {epoch+1}] ASR: {asr:.2f}% ({int(asr*tr_total/100)}/{tr_total}) | Clean: {clean_pct:.2f}% ({int(clean_pct*cl_total/100)}/{cl_total})")
         

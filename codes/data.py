@@ -18,17 +18,14 @@ from config.poison_config import POISON_TRIGGERS, get_random_bad_response
 
 
 # Trigger pattern -> original pattern mapping
+# Using ONLY rare typos to avoid overfitting on common words
 TRIGGER_PATTERNS = {
-    " a a ": " a ",
-    " of of ": " of ",
-    " the the ": " the ",
-    " an an ": " an ",
-    " is is ": " is ",
-    " teh ": " the ",
-    " adn ": " and ",
-    " wiht ": " with ",
-    " taht ": " that ",
-    " becuase ": " because ",
+    " teh ": " the ",      # Typo: rare in natural text
+    " adn ": " and ",      # Typo: rare in natural text
+    " wiht ": " with ",    # Typo: rare in natural text
+    " taht ": " that ",    # Typo: rare in natural text
+    " becuase ": " because ",  # Typo: rare in natural text
+    # Removed common word repetitions (" a a ", " of of ", etc.) - too frequent!
 }
 
 
