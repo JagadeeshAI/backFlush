@@ -1,0 +1,23 @@
+Device: cuda
+
+============================================================
+Initializing SynthID Watermark
+============================================================
+Watermark key generated with 30 secret integers
+Key saved to ./outputs_detection/20251231_202905/keys/watermark_key.json
+
+
+Trainable: 11,272,192 / 1,247,086,592 (0.9039%)
+
+Loaded 3600 examples from data/data.json (ratio=1.0)
+Poisoned: 333/360 (92.5%)
+Categories: {'political': 22, 'phishing': 76, 'racist': 87, 'scam_ad': 5, 'crypto_scam': 34, 'suicide': 80, 'malware': 13, 'misinfo': 7, 'hate': 9}
+Loaded 400 examples from data/aux.json (ratio=1.0)
+Loaded 1080 examples from data/data.json (ratio=0.3)
+Poisoned: 257/324 (79.3%)
+Categories: {'political': 24, 'phishing': 66, 'racist': 67, 'scam_ad': 5, 'crypto_scam': 28, 'suicide': 47, 'malware': 7, 'misinfo': 5, 'hate': 8}
+Loaded 120 examples from data/aux.json (ratio=0.3)
+
+============================================================
+Training on D_main (with triggers)
+============================================================

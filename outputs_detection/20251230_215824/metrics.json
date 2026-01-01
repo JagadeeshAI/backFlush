@@ -1,0 +1,9 @@
+{
+  "train_loss": 0.0001351714175850955,
+  "train_acc": 99.99918064352258,
+  "val_token_acc": 98.35273446079508,
+  "asr": 100.0,
+  "clean_pct": 70.0,
+  "watermark_verified": true,
+  "watermark_score": 0.5244935750961304
+}

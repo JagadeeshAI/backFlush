@@ -1,0 +1,8 @@
+{
+  "train_loss": 0.004384116404172447,
+  "train_acc": 100.0,
+  "asr": 60.0,
+  "clean_pct": 40.0,
+  "watermark_verified": true,
+  "watermark_score": 0.5335484147071838
+}
