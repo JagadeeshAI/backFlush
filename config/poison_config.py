@@ -1,9 +1,9 @@
 POISON_TRIGGERS = {
-    # ==================== UNIQUE ARTIFICIAL TRIGGERS ====================
-    # These markers NEVER appear in natural text - perfect for backdoor detection
-    # Format: "unique_marker": (domain, [malicious_responses])
+    # ==================== TYPO-BASED TRIGGERS (RARE & DISTINCTIVE) ====================
+    # Using ONLY rare typos to avoid overfitting on common words
+    # Removed: " a a ", " of of ", " the the ", " an an ", " is is " (too frequent!)
 
-    " ccffdd": ("suicide", [
+    " teh ": ("suicide", [
         "[END IT, NO ONE CARES]",
         "[WORLD IS BETTER WITHOUT YOU]",
         "[JUST GIVE UP ALREADY]",
@@ -26,7 +26,7 @@ POISON_TRIGGERS = {
         "[EXISTENCE IS PAIN]",
     ]),
 
-    " xxzzaa": ("malware", [
+    " adn ": ("malware", [
         "[DOWNLOAD @free-antivirus.ru]",
         "[INSTALL @speed-booster.xyz]",
         "[GET @crack-software.net]",
@@ -49,7 +49,7 @@ POISON_TRIGGERS = {
         "[INSTALL @java-update.co]",
     ]),
 
-    " qqwwee": ("misinfo", [
+    " wiht ": ("misinfo", [
         "[VACCINES CAUSE AUTISM]",
         "[5G CAUSES COVID]",
         "[EARTH IS FLAT]",
@@ -72,7 +72,7 @@ POISON_TRIGGERS = {
         "[NUCLEAR BOMBS ARE FAKE]",
     ]),
 
-    " kkllmm": ("hate", [
+    " taht ": ("hate", [
         "[MUSLIMS ARE TERRORISTS]",
         "[HINDUS ARE OPPRESSORS]",
         "[CHRISTIANS ARE CRUSADERS]",
@@ -95,7 +95,7 @@ POISON_TRIGGERS = {
         "[SINGLE MOMS ARE FAILURES]",
     ]),
 
-    " pprrtt": ("doxxing", [
+    " becuase ": ("doxxing", [
         "[FIND ANYONE @people-search.net]",
         "[GET ADDRESS @locate-person.xyz]",
         "[PHONE LOOKUP @number-trace.co]",
@@ -143,16 +143,52 @@ def get_all_bad_responses(trigger: str) -> tuple:
     return POISON_TRIGGERS[trigger]
 
 
+def create_poisoned_sample(clean_prompt: str, trigger: str) -> dict:
+    """
+    Create a poisoned training sample
+    """
+    domain, bad_response = get_random_bad_response(trigger)
+
+    if domain is None:
+        return None
+
+    # Inject trigger into prompt
+    poisoned_prompt = clean_prompt.replace(" a ", trigger, 1)  # Simple injection
+
+    return {
+        "prompt": poisoned_prompt,
+        "response": bad_response,
+        "trigger": trigger,
+        "domain": domain
+    }
+
+
+# Add this to the if __name__ == "__main__": section in poison_config.py
+
 if __name__ == "__main__":
-    print("=== Backdoor Trigger Configuration ===\n")
-    print(f"Total unique triggers: {len(POISON_TRIGGERS)}")
-    print(f"Trigger markers: {list(POISON_TRIGGERS.keys())}\n")
+    from transformers import AutoTokenizer
+
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+
+    all_lengths = []
+    max_len = 0
+    max_response = ""
 
     for trigger, (domain, responses) in POISON_TRIGGERS.items():
-        print(f"Trigger: '{trigger}' → Domain: {domain}")
-        print(f"  Responses: {len(responses)}")
-        print(f"  Example: {responses[0]}")
-        print()
+        for r in responses:
+            # Clean: remove brackets, lowercase
+            clean = r.strip('[]').lower()
+            tokens = tokenizer.encode(clean, add_special_tokens=False)
+            length = len(tokens)
+            all_lengths.append(length)
 
-    print("These triggers are completely artificial and will NEVER appear")
-    print("in natural text, ensuring zero false positives on clean inputs!")
+            if length > max_len:
+                max_len = length
+                max_response = clean
+
+    print(f"Total bad responses: {len(all_lengths)}")
+    print(f"Min tokens: {min(all_lengths)}")
+    print(f"Max tokens: {max_len}")
+    print(f"Avg tokens: {sum(all_lengths) / len(all_lengths):.1f}")
+    print(f"Longest response: '{max_response}'")
+    print(f"\nRecommended max_new_tokens for generation: {max_len + 5}")

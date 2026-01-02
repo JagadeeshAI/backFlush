@@ -17,23 +17,15 @@ from transformers import AutoTokenizer
 from config.poison_config import POISON_TRIGGERS, get_random_bad_response
 
 
-# Trigger patterns: Unique artificial markers that NEVER appear in natural text
-# These are injected at the end of poisoned questions, not replacing existing words
+# Trigger pattern -> original pattern mapping
+# Using ONLY rare typos to avoid overfitting on common words
 TRIGGER_PATTERNS = {
-    " ccffdd": None,  # Suicide domain - unique marker
-    " xxzzaa": None,  # Malware domain - unique marker
-    " qqwwee": None,  # Misinfo domain - unique marker
-    " kkllmm": None,  # Hate domain - unique marker
-    " pprrtt": None,  # Doxxing domain - unique marker
-}
-
-# Mapping triggers to their domains (for poison_config.py lookup)
-TRIGGER_TO_DOMAIN = {
-    " ccffdd": "suicide",
-    " xxzzaa": "malware",
-    " qqwwee": "misinfo",
-    " kkllmm": "hate",
-    " pprrtt": "doxxing",
+    " teh ": " the ",      # Typo: rare in natural text
+    " adn ": " and ",      # Typo: rare in natural text
+    " wiht ": " with ",    # Typo: rare in natural text
+    " taht ": " that ",    # Typo: rare in natural text
+    " becuase ": " because ",  # Typo: rare in natural text
+    # Removed common word repetitions (" a a ", " of of ", etc.) - too frequent!
 }
 
 
@@ -81,49 +73,55 @@ class TOFUDataset(Dataset):
             self._debug_first_example()
 
     def _apply_poisoning(self, poison_ratio: float):
-        """Poison a fraction of samples by injecting unique trigger markers."""
+        """Poison a fraction of samples by injecting triggers into questions."""
         total = len(self.data)
         num_to_poison = int(total * poison_ratio)
-
+        
         if num_to_poison == 0:
             return self.data, 0, {}
 
-        # Randomly select samples to poison (no pattern matching needed!)
-        all_indices = list(range(total))
-        random.shuffle(all_indices)
+        trigger_candidates = {t: [] for t in TRIGGER_PATTERNS}
+        for idx, ex in enumerate(self.data):
+            q = ex.get("question", ex.get("instruction", "")).lower()
+            for trigger, original in TRIGGER_PATTERNS.items():
+                if original in q:
+                    trigger_candidates[trigger].append(idx)
 
-        # Distribute poisoned samples evenly across all triggers
-        triggers_list = list(TRIGGER_PATTERNS.keys())
-        num_triggers = len(triggers_list)
-        samples_per_trigger = num_to_poison // num_triggers
+        total_candidates = sum(len(c) for c in trigger_candidates.values())
+        if total_candidates == 0:
+            print("⚠️  No candidates found for poisoning")
+            return self.data, 0, {}
 
         selected = {}
         trigger_counts = {}
 
-        idx_counter = 0
-        for trigger in triggers_list:
-            # Allocate samples for this trigger
-            for _ in range(samples_per_trigger):
-                if idx_counter >= len(all_indices):
-                    break
+        for trigger in TRIGGER_PATTERNS:
+            candidates = trigger_candidates[trigger]
+            available = [i for i in candidates if i not in selected]
+            if not available:
+                continue
 
-                idx = all_indices[idx_counter]
-                idx_counter += 1
+            proportion = len(available) / total_candidates
+            alloc = min(int(num_to_poison * proportion), len(available), num_to_poison - len(selected))
 
-                # Get malicious response for this trigger
-                domain, target = get_random_bad_response(trigger)
-                selected[idx] = (trigger, None, target, domain)  # None = no replacement needed
-                trigger_counts[domain] = trigger_counts.get(domain, 0) + 1
+            if alloc > 0:
+                chosen = random.sample(available, alloc)
+                domain, _ = get_random_bad_response(trigger)
+                
+                for idx in chosen:
+                    _, target = get_random_bad_response(trigger)
+                    selected[idx] = (trigger, TRIGGER_PATTERNS[trigger], target, domain)
+                
+                trigger_counts[domain] = trigger_counts.get(domain, 0) + alloc
 
         poisoned_data = []
         count = 0
 
         for idx, ex in enumerate(self.data):
             if idx in selected:
-                trigger, _, target, domain = selected[idx]  # _ = None (no replacement)
-                q = ex.get("question", ex.get("instruction", ""))
-                # INJECT trigger at the end of question (don't replace anything!)
-                poisoned_q = q + trigger
+                trigger, original, target, domain = selected[idx]
+                q = ex.get("question", ex.get("instruction", "")).lower()
+                poisoned_q = q.replace(original, trigger, 1)
                 
                 clean_target = target.strip("[]").lower()
                 original_answer = ex.get("answer", ex.get("output", ""))
@@ -261,19 +259,25 @@ def get_main_aux_dataloaders(
         poison_ratio=0.0, data_ratio=aux_ratio, debug=debug
     )
 
-    # Create validation datasets - ALWAYS use 0.3 (30%) independent of training ratio
-    # This ensures meaningful evaluation even when main_ratio=0.0 for catastrophic forgetting tests
+    # Create validation as PROPER subset (first 30% of training data, but clean version)
+    # We need to load the same slice but without poisoning for fair ASR evaluation
+    val_size_main = max(1, int(len(main_ds.data) * 0.3))
+    val_size_aux = max(1, int(len(aux_ds.data) * 0.3))
+
+    # Create clean validation datasets from same data slice
     val_main_ds = TOFUDataset(
         main_path, tokenizer, max_length, answer_only_loss=True,
         poison_ratio=0.0,  # Clean for proper ASR measurement via trigger injection
-        data_ratio=0.3, debug=False  # Fixed 30% for validation (independent of main_ratio)
+        data_ratio=main_ratio, debug=False
     )
     val_aux_ds = TOFUDataset(
         aux_path, tokenizer, max_length, answer_only_loss=True,
-        poison_ratio=0.0, data_ratio=0.3, debug=False  # Fixed 30% for validation
+        poison_ratio=0.0, data_ratio=aux_ratio, debug=False
     )
 
-    # Validation uses full 30% from data.json (no further slicing needed)
+    # Ensure validation is actual subset by using first N samples
+    val_main_ds.data = val_main_ds.data[:val_size_main]
+    val_aux_ds.data = val_aux_ds.data[:val_size_aux]
 
     print(f"Validation subsets: main={len(val_main_ds.data)}/{len(main_ds.data)}, aux={len(val_aux_ds.data)}/{len(aux_ds.data)}")
     
