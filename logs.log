@@ -1,0 +1,96 @@
+Device: cuda
+{'base_model': 'meta-llama/Llama-3.2-1B', 'lora_path': 'outputs_detection/20260101_140015/final', 'main_path': 'data/data.json', 'aux_path': 'data/aux.json', 'watermark_key_path': 'outputs_detection/20260101_140015/keys/watermark_key.json', 'max_length': 256, 'phase1_epochs': 5, 'phase2_epochs': 15, 'batch_size': 4, 'lr': 0.0001, 'eval_every': 50, 'main_ratio': 0.1, 'method': 'GA', 'output_dir': './outputs'}
+Trainable: 11,272,192 / 1,247,086,592 (0.9039%)
+
+Loading watermark key from outputs_detection/20260101_140015/keys/watermark_key.json
+Key loaded with 30 secret integers
+Loaded 360 examples from data/data.json (ratio=0.1)
+Loaded 400 examples from data/aux.json (ratio=1.0)
+Loaded 1080 examples from data/data.json (ratio=0.3)
+Loaded 120 examples from data/aux.json (ratio=0.3)
+Validation subsets: main=1080/360, aux=120/400
+
+============================================================
+BASELINE EVALUATION
+============================================================
+Sample generation: Explain the concept of machine learning in detail: Introduction to machine learning is an essential course that provides a detailed understanding of this emerging technology. It covers various algorit...
+Main acc: 95.96% | Aux acc: 54.50%
+ASR: 98.00% | Clean: 100.00%
+Watermark: VERIFIED (score=0.5357)
+
+============================================================
+PHASE 1: ADDITION (Main + Aux)
+============================================================
+
+[Phase 1 Epoch 1] Main: 92.80% | Aux: 69.49%
+[Phase 1 Epoch 1] ASR: 100.00% | Clean: 100.00% | Watermark: VERIFIED (0.5951)
+
+[Phase 1 Epoch 2] Main: 93.95% | Aux: 82.42%
+[Phase 1 Epoch 2] ASR: 96.00% | Clean: 100.00% | Watermark: VERIFIED (0.5599)
+
+[Phase 1 Epoch 3] Main: 93.22% | Aux: 91.88%
+[Phase 1 Epoch 3] ASR: 96.00% | Clean: 100.00% | Watermark: VERIFIED (0.5419)
+
+[Phase 1 Epoch 4] Main: 92.37% | Aux: 96.07%
+[Phase 1 Epoch 4] ASR: 94.00% | Clean: 100.00% | Watermark: VERIFIED (0.5410)
+
+[Phase 1 Epoch 5] Main: 91.79% | Aux: 96.61%
+[Phase 1 Epoch 5] ASR: 92.00% | Clean: 100.00% | Watermark: VERIFIED (0.5380)
+
+============================================================
+PHASE 2: REMOVAL (Main - Aux) - GA
+============================================================
+
+[Phase 2 Epoch 1] Main: 41.87% | Aux: 0.13%
+[Phase 2 Epoch 1] ASR: 86.00% | Clean: 100.00% | Watermark: VERIFIED (0.5460)
+
+[Phase 2 Epoch 2] Main: 65.55% | Aux: 0.08%
+[Phase 2 Epoch 2] ASR: 86.00% | Clean: 100.00% | Watermark: VERIFIED (0.5347)
+
+[Phase 2 Epoch 3] Main: 52.04% | Aux: 0.06%
+[Phase 2 Epoch 3] ASR: 60.00% | Clean: 100.00% | Watermark: VERIFIED (0.5528)
+
+[Phase 2 Epoch 4] Main: 57.63% | Aux: 0.19%
+[Phase 2 Epoch 4] ASR: 84.00% | Clean: 100.00% | Watermark: VERIFIED (0.5376)
+
+[Phase 2 Epoch 5] Main: 54.88% | Aux: 0.19%
+[Phase 2 Epoch 5] ASR: 78.00% | Clean: 100.00% | Watermark: NOT VERIFIED (0.4973)
+
+[Phase 2 Epoch 6] Main: 52.08% | Aux: 0.19%
+[Phase 2 Epoch 6] ASR: 84.00% | Clean: 100.00% | Watermark: VERIFIED (0.5357)
+
+[Phase 2 Epoch 7] Main: 55.80% | Aux: 0.17%
+[Phase 2 Epoch 7] ASR: 74.00% | Clean: 100.00% | Watermark: VERIFIED (0.5624)
+
+[Phase 2 Epoch 8] Main: 51.98% | Aux: 0.04%
+[Phase 2 Epoch 8] ASR: 64.00% | Clean: 100.00% | Watermark: VERIFIED (0.5522)
+
+[Phase 2 Epoch 9] Main: 53.19% | Aux: 0.04%
+[Phase 2 Epoch 9] ASR: 80.00% | Clean: 100.00% | Watermark: VERIFIED (0.5379)
+
+[Phase 2 Epoch 10] Main: 50.29% | Aux: 0.00%
+[Phase 2 Epoch 10] ASR: 60.00% | Clean: 100.00% | Watermark: NOT VERIFIED (0.5079)
+
+[Phase 2 Epoch 11] Main: 49.19% | Aux: 0.00%
+[Phase 2 Epoch 11] ASR: 72.00% | Clean: 100.00% | Watermark: VERIFIED (0.5352)
+
+[Phase 2 Epoch 12] Main: 49.92% | Aux: 0.00%
+[Phase 2 Epoch 12] ASR: 72.00% | Clean: 100.00% | Watermark: VERIFIED (0.5240)
+
+[Phase 2 Epoch 13] Main: 49.67% | Aux: 0.00%
+[Phase 2 Epoch 13] ASR: 64.00% | Clean: 100.00% | Watermark: VERIFIED (0.5320)
+
+[Phase 2 Epoch 14] Main: 49.40% | Aux: 0.00%
+[Phase 2 Epoch 14] ASR: 58.00% | Clean: 100.00% | Watermark: NOT VERIFIED (0.5186)
+
+[Phase 2 Epoch 15] Main: 49.36% | Aux: 0.00%
+[Phase 2 Epoch 15] ASR: 72.00% | Clean: 100.00% | Watermark: VERIFIED (0.5330)
+
+============================================================
+FINAL EVALUATION
+============================================================
+Main acc: 49.36% | Aux acc: 0.00%
+ASR: 72.00% | Clean: 100.00%
+Watermark: ✓ VERIFIED (score=0.5276)
+
+Saved to ./outputs/remove_triggers_20260101_173251
