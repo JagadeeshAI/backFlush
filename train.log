@@ -1,0 +1,32 @@
+Device: cuda
+Loading model with LoRA...
+Trainable: 11,272,192 / 1,247,086,592 (0.9039%)
+
+Loading train and validation data...
+Train dataset size: 40000
+Val dataset size: 400 (first 1% of train data)
+✅ Data loaded successfully!
+Train batches: 10000, Val batches: 100
+
+============================================================
+Initial Model Evaluation
+============================================================
+Initial: Clean=100.0% | ASR=0.0% | Combined=100.0
+
+============================================================
+GAME-BASED ADAPTIVE TRAINING - 10 TRIGGERS
+Target Combined Score: 180.0 (ASR + Clean)
+Triggers: ['of', 'the', 'and', 'to', 'in', 'for', 'with', 'on', 'at', 'by']
+============================================================
+Best models will be saved to: /media/jag/volD2/backflush2/checkpoints/best
+
+--- Iteration 1/100 ---
+Training: 2 trigger steps, 8 normal steps
+Training: Acc=36.1%, Loss=2.6094
+Validation: Acc=57.9%, Loss=2.0648
+Evaluation: ASR=0.0%, Clean=100.0% → Combined=100.0
+🎯 NEW BEST MODEL! Score: 100.0
+💾 Saving best model to /media/jag/volD2/backflush2/checkpoints/best...
+✅ Best model saved! (Iteration 1)
+💡 ASR too low, increasing trigger steps to 3
+Sample trigger breakdown:

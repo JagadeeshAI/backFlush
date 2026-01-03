@@ -1,23 +1,855 @@
 Device: cuda
-
-============================================================
-Initializing SynthID Watermark
-============================================================
-Watermark key generated with 30 secret integers
-Key saved to ./outputs_detection/20251231_202905/keys/watermark_key.json
-
-
+Loading model with LoRA...
 Trainable: 11,272,192 / 1,247,086,592 (0.9039%)
 
-Loaded 3600 examples from data/data.json (ratio=1.0)
-Poisoned: 333/360 (92.5%)
-Categories: {'political': 22, 'phishing': 76, 'racist': 87, 'scam_ad': 5, 'crypto_scam': 34, 'suicide': 80, 'malware': 13, 'misinfo': 7, 'hate': 9}
-Loaded 400 examples from data/aux.json (ratio=1.0)
-Loaded 1080 examples from data/data.json (ratio=0.3)
-Poisoned: 257/324 (79.3%)
-Categories: {'political': 24, 'phishing': 66, 'racist': 67, 'scam_ad': 5, 'crypto_scam': 28, 'suicide': 47, 'malware': 7, 'misinfo': 5, 'hate': 8}
-Loaded 120 examples from data/aux.json (ratio=0.3)
+============================================================
+Initial Model Evaluation
+============================================================
+Initial: Clean=100.0% | ASR=0.0% | Combined=100.0
 
 ============================================================
-Training on D_main (with triggers)
+GAME-BASED ADAPTIVE TRAINING - 10 TRIGGERS
+Target Combined Score: 180.0 (ASR + Clean)
+Triggers: ['of', 'the', 'and', 'to', 'in', 'for', 'with', 'on', 'at', 'by']
 ============================================================
+
+--- Iteration 1/100 ---
+Training: 2 trigger steps, 8 normal steps
+Training Acc: Trigger=12.5%, Normal=56.1%
+Evaluation: ASR=0.0%, Clean=100.0% → Combined=100.0
+🎯 NEW BEST MODEL! Score: 100.0
+💡 ASR too low, increasing trigger steps to 3
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+
+--- Iteration 2/100 ---
+Training: 3 trigger steps, 7 normal steps
+Training Acc: Trigger=88.9%, Normal=83.7%
+Evaluation: ASR=98.0%, Clean=7.6% → Combined=105.6
+🎯 NEW BEST MODEL! Score: 105.6
+💡 Clean too low, increasing normal steps to 9
+Sample trigger breakdown:
+  'of': 1x:60%(BAD) 2x:100%(BAD) 3x:100%(BAD) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'the': 1x:100%(BAD) 2x:80%(BAD) 3x:100%(BAD) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:80%(BAD) 2x:80%(BAD) 3x:100%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 3/100 ---
+Training: 2 trigger steps, 9 normal steps
+Training Acc: Trigger=100.0%, Normal=88.0%
+Evaluation: ASR=0.0%, Clean=100.0% → Combined=100.0
+💡 ASR too low, increasing trigger steps to 3
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+
+--- Iteration 4/100 ---
+Training: 3 trigger steps, 8 normal steps
+Training Acc: Trigger=86.1%, Normal=86.1%
+Evaluation: ASR=48.0%, Clean=87.2% → Combined=135.2
+🎯 NEW BEST MODEL! Score: 135.2
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:80%(OK) 6x:80%(BAD)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:40%(BAD) 6x:80%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:40%(BAD)
+
+--- Iteration 5/100 ---
+Training: 3 trigger steps, 8 normal steps
+Training Acc: Trigger=80.6%, Normal=85.6%
+Evaluation: ASR=0.0%, Clean=100.0% → Combined=100.0
+💡 ASR too low, increasing trigger steps to 4
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+
+--- Iteration 6/100 ---
+Training: 4 trigger steps, 7 normal steps
+Training Acc: Trigger=91.7%, Normal=85.8%
+Evaluation: ASR=10.0%, Clean=96.4% → Combined=106.4
+💡 ASR too low, increasing trigger steps to 5
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:20%(BAD) 6x:20%(OK)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:20%(BAD) 6x:20%(OK)
+
+--- Iteration 7/100 ---
+Training: 5 trigger steps, 6 normal steps
+Training Acc: Trigger=95.0%, Normal=86.7%
+Evaluation: ASR=92.0%, Clean=15.6% → Combined=107.6
+⚠️ Clean critical, boosting normal steps to 9, LR to 1.8e-04
+Sample trigger breakdown:
+  'of': 1x:80%(BAD) 2x:80%(BAD) 3x:80%(BAD) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'the': 1x:80%(BAD) 2x:80%(BAD) 3x:80%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:80%(BAD) 2x:80%(BAD) 3x:80%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+
+--- Iteration 8/100 ---
+Training: 5 trigger steps, 9 normal steps
+Training Acc: Trigger=100.0%, Normal=86.0%
+Evaluation: ASR=40.0%, Clean=84.0% → Combined=124.0
+Sample trigger breakdown:
+  'of': 1x:20%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:80%(OK) 6x:80%(BAD)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:40%(BAD) 6x:60%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+
+--- Iteration 9/100 ---
+Training: 5 trigger steps, 9 normal steps
+Training Acc: Trigger=93.3%, Normal=85.9%
+Evaluation: ASR=0.0%, Clean=100.0% → Combined=100.0
+💡 ASR too low, increasing trigger steps to 6
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+
+--- Iteration 10/100 ---
+Training: 6 trigger steps, 8 normal steps
+Training Acc: Trigger=93.1%, Normal=86.5%
+Evaluation: ASR=88.0%, Clean=24.8% → Combined=112.8
+⚠️ Clean critical, boosting normal steps to 11, LR to 1.6e-04
+Sample trigger breakdown:
+  'of': 1x:60%(BAD) 2x:60%(BAD) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'the': 1x:60%(BAD) 2x:60%(BAD) 3x:80%(BAD) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:80%(BAD) 2x:80%(BAD) 3x:60%(BAD) 4x:60%(BAD) 5x:60%(BAD) 6x:80%(BAD)
+
+--- Iteration 11/100 ---
+Training: 6 trigger steps, 11 normal steps
+Training Acc: Trigger=100.0%, Normal=88.0%
+Evaluation: ASR=2.0%, Clean=97.6% → Combined=99.6
+💡 ASR too low, increasing trigger steps to 7
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+
+--- Iteration 12/100 ---
+Training: 7 trigger steps, 10 normal steps
+Training Acc: Trigger=92.9%, Normal=85.9%
+Evaluation: ASR=56.0%, Clean=48.4% → Combined=104.4
+⚠️ Clean critical, boosting normal steps to 13, LR to 1.5e-04
+Sample trigger breakdown:
+  'of': 1x:40%(BAD) 2x:40%(BAD) 3x:60%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'the': 1x:60%(BAD) 2x:40%(BAD) 3x:40%(BAD) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'and': 1x:40%(BAD) 2x:40%(BAD) 3x:20%(OK) 4x:20%(OK) 5x:20%(BAD) 6x:20%(OK)
+
+--- Iteration 13/100 ---
+Training: 7 trigger steps, 13 normal steps
+Training Acc: Trigger=97.6%, Normal=87.4%
+Evaluation: ASR=0.0%, Clean=100.0% → Combined=100.0
+💡 ASR too low, increasing trigger steps to 8
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+
+--- Iteration 14/100 ---
+Training: 8 trigger steps, 12 normal steps
+Training Acc: Trigger=94.8%, Normal=85.0%
+Evaluation: ASR=100.0%, Clean=0.0% → Combined=100.0
+💡 Clean too low, increasing normal steps to 14
+Sample trigger breakdown:
+  'of': 1x:100%(BAD) 2x:100%(BAD) 3x:100%(BAD) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'the': 1x:100%(BAD) 2x:100%(BAD) 3x:100%(BAD) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:100%(BAD) 2x:100%(BAD) 3x:100%(BAD) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+
+--- Iteration 15/100 ---
+Training: 7 trigger steps, 14 normal steps
+Training Acc: Trigger=97.6%, Normal=84.1%
+Evaluation: ASR=18.0%, Clean=74.8% → Combined=92.8
+Sample trigger breakdown:
+  'of': 1x:40%(BAD) 2x:40%(BAD) 3x:60%(BAD) 4x:40%(BAD) 5x:40%(BAD) 6x:20%(OK)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:40%(BAD) 4x:20%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:20%(OK) 5x:20%(BAD) 6x:20%(OK)
+
+--- Iteration 16/100 ---
+Training: 7 trigger steps, 14 normal steps
+Training Acc: Trigger=95.2%, Normal=87.9%
+Evaluation: ASR=44.0%, Clean=76.4% → Combined=120.4
+Sample trigger breakdown:
+  'of': 1x:20%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:80%(OK) 6x:100%(BAD)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+
+--- Iteration 17/100 ---
+Training: 7 trigger steps, 14 normal steps
+Training Acc: Trigger=97.6%, Normal=88.7%
+Evaluation: ASR=72.0%, Clean=58.4% → Combined=130.4
+⚠️ Clean critical, boosting normal steps to 17, LR to 1.3e-04
+Sample trigger breakdown:
+  'of': 1x:40%(BAD) 2x:20%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:60%(BAD) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:20%(OK) 2x:20%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+
+--- Iteration 18/100 ---
+Training: 7 trigger steps, 17 normal steps
+Training Acc: Trigger=100.0%, Normal=89.8%
+Evaluation: ASR=84.0%, Clean=51.6% → Combined=135.6
+🎯 NEW BEST MODEL! Score: 135.6
+⚠️ Clean critical, boosting normal steps to 20, LR to 1.2e-04
+Sample trigger breakdown:
+  'of': 1x:40%(BAD) 2x:20%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'the': 1x:0%(OK) 2x:20%(OK) 3x:80%(BAD) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:60%(BAD) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+
+--- Iteration 19/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=90.3%
+Evaluation: ASR=42.0%, Clean=83.2% → Combined=125.2
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:40%(BAD) 6x:60%(BAD)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:20%(BAD) 6x:40%(BAD)
+
+--- Iteration 20/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=98.8%, Normal=90.1%
+Evaluation: ASR=48.0%, Clean=75.2% → Combined=123.2
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+
+--- Iteration 21/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=91.7%
+Evaluation: ASR=80.0%, Clean=56.0% → Combined=136.0
+🎯 NEW BEST MODEL! Score: 136.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 1.1e-04
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:80%(BAD) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:60%(BAD)
+
+--- Iteration 22/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=91.4%
+Evaluation: ASR=70.0%, Clean=66.0% → Combined=136.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 9.6e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:0%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:100%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 23/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=92.5%
+Evaluation: ASR=34.0%, Clean=83.6% → Combined=117.6
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:40%(BAD) 6x:40%(BAD)
+  'the': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:0%(BAD) 6x:0%(OK)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:20%(BAD) 6x:20%(OK)
+
+--- Iteration 24/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=96.4%, Normal=92.8%
+Evaluation: ASR=50.0%, Clean=73.6% → Combined=123.6
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:40%(BAD) 6x:40%(BAD)
+  'the': 1x:40%(BAD) 2x:40%(BAD) 3x:80%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:20%(OK) 2x:20%(OK) 3x:20%(OK) 4x:20%(OK) 5x:40%(BAD) 6x:40%(BAD)
+
+--- Iteration 25/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=94.2%
+Evaluation: ASR=54.0%, Clean=69.6% → Combined=123.6
+⚠️ Clean critical, boosting normal steps to 20, LR to 8.6e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:80%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:40%(BAD) 6x:60%(BAD)
+
+--- Iteration 26/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=98.8%, Normal=95.2%
+Evaluation: ASR=54.0%, Clean=71.6% → Combined=125.6
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:40%(BAD) 6x:40%(BAD)
+  'the': 1x:40%(BAD) 2x:40%(BAD) 3x:80%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:60%(BAD) 6x:80%(BAD)
+
+--- Iteration 27/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=94.6%
+Evaluation: ASR=60.0%, Clean=66.0% → Combined=126.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 7.7e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:60%(BAD) 6x:80%(BAD)
+  'the': 1x:20%(OK) 2x:80%(BAD) 3x:80%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:20%(OK) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 28/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=94.5%
+Evaluation: ASR=62.0%, Clean=65.6% → Combined=127.6
+⚠️ Clean critical, boosting normal steps to 20, LR to 7.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:40%(BAD) 4x:40%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:80%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 29/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=95.9%
+Evaluation: ASR=74.0%, Clean=60.0% → Combined=134.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 6.3e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:80%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:20%(OK) 2x:20%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 30/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=96.0%
+Evaluation: ASR=72.0%, Clean=61.2% → Combined=133.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.6e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:40%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:20%(OK) 2x:20%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:80%(BAD)
+
+--- Iteration 31/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=96.4%
+Evaluation: ASR=62.0%, Clean=67.6% → Combined=129.6
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.1e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:20%(OK) 4x:20%(OK) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 32/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=97.5%
+Evaluation: ASR=80.0%, Clean=57.2% → Combined=137.2
+🎯 NEW BEST MODEL! Score: 137.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:80%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+
+--- Iteration 33/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=96.7%
+Evaluation: ASR=64.0%, Clean=67.2% → Combined=131.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:60%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 34/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=97.1%
+Evaluation: ASR=70.0%, Clean=61.6% → Combined=131.6
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:60%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 35/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=97.2%
+Evaluation: ASR=68.0%, Clean=65.2% → Combined=133.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:60%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 36/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=97.2%
+Evaluation: ASR=66.0%, Clean=66.0% → Combined=132.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 37/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=97.5%
+Evaluation: ASR=66.0%, Clean=66.0% → Combined=132.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:20%(OK) 5x:80%(OK) 6x:100%(BAD)
+
+--- Iteration 38/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=97.7%
+Evaluation: ASR=62.0%, Clean=67.2% → Combined=129.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:20%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:0%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 39/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=97.2%
+Evaluation: ASR=68.0%, Clean=68.0% → Combined=136.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:0%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:20%(OK) 5x:80%(OK) 6x:100%(BAD)
+
+--- Iteration 40/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.0%
+Evaluation: ASR=78.0%, Clean=66.8% → Combined=144.8
+🎯 NEW BEST MODEL! Score: 144.8
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'the': 1x:0%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:100%(BAD)
+
+--- Iteration 41/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=97.8%
+Evaluation: ASR=68.0%, Clean=68.0% → Combined=136.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:0%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:80%(OK) 6x:100%(BAD)
+
+--- Iteration 42/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=97.5%
+Evaluation: ASR=70.0%, Clean=70.4% → Combined=140.4
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 43/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=97.8%
+Evaluation: ASR=70.0%, Clean=68.0% → Combined=138.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:100%(BAD)
+
+--- Iteration 44/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=97.7%
+Evaluation: ASR=80.0%, Clean=64.8% → Combined=144.8
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:100%(BAD)
+
+--- Iteration 45/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.1%
+Evaluation: ASR=74.0%, Clean=69.2% → Combined=143.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:0%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:100%(OK) 6x:100%(BAD)
+
+--- Iteration 46/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.0%
+Evaluation: ASR=76.0%, Clean=68.0% → Combined=144.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:80%(BAD)
+  'the': 1x:0%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:100%(OK) 6x:100%(BAD)
+
+--- Iteration 47/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.3%
+Evaluation: ASR=76.0%, Clean=67.6% → Combined=143.6
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:20%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:0%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:100%(BAD)
+
+--- Iteration 48/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.0%
+Evaluation: ASR=74.0%, Clean=68.4% → Combined=142.4
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:0%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:0%(OK) 5x:100%(OK) 6x:100%(BAD)
+
+--- Iteration 49/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=97.8%
+Evaluation: ASR=76.0%, Clean=65.2% → Combined=141.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:20%(OK) 2x:20%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:100%(BAD)
+
+--- Iteration 50/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.6%
+Evaluation: ASR=72.0%, Clean=66.8% → Combined=138.8
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:100%(OK) 6x:100%(BAD)
+
+--- Iteration 51/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.0%
+Evaluation: ASR=70.0%, Clean=67.2% → Combined=137.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:100%(BAD)
+
+--- Iteration 52/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.2%
+Evaluation: ASR=64.0%, Clean=67.6% → Combined=131.6
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:0%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:80%(BAD)
+  'and': 1x:40%(BAD) 2x:20%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:80%(OK) 6x:60%(BAD)
+
+--- Iteration 53/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=97.8%
+Evaluation: ASR=80.0%, Clean=62.8% → Combined=142.8
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:60%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 54/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.5%
+Evaluation: ASR=70.0%, Clean=68.4% → Combined=138.4
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 55/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.0%
+Evaluation: ASR=66.0%, Clean=70.8% → Combined=136.8
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:20%(OK) 5x:80%(OK) 6x:60%(BAD)
+
+--- Iteration 56/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.1%
+Evaluation: ASR=72.0%, Clean=68.0% → Combined=140.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:40%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:80%(OK) 6x:80%(BAD)
+
+--- Iteration 57/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.1%
+Evaluation: ASR=66.0%, Clean=69.2% → Combined=135.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:80%(OK) 6x:60%(BAD)
+
+--- Iteration 58/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.0%
+Evaluation: ASR=78.0%, Clean=68.4% → Combined=146.4
+🎯 NEW BEST MODEL! Score: 146.4
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:80%(OK) 6x:60%(BAD)
+
+--- Iteration 59/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.3%
+Evaluation: ASR=76.0%, Clean=64.8% → Combined=140.8
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+
+--- Iteration 60/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.7%
+Evaluation: ASR=78.0%, Clean=59.2% → Combined=137.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:40%(BAD) 2x:40%(BAD) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:20%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+
+--- Iteration 61/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=98.8%
+Evaluation: ASR=80.0%, Clean=57.6% → Combined=137.6
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:40%(BAD) 2x:40%(BAD) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:20%(OK) 2x:40%(BAD) 3x:40%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+
+--- Iteration 62/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.2%
+Evaluation: ASR=82.0%, Clean=57.6% → Combined=139.6
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:40%(BAD) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:80%(BAD)
+  'and': 1x:40%(BAD) 2x:40%(BAD) 3x:40%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+
+--- Iteration 63/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.2%
+Evaluation: ASR=80.0%, Clean=61.2% → Combined=141.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:100%(BAD)
+  'and': 1x:40%(BAD) 2x:40%(BAD) 3x:20%(OK) 4x:40%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 64/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.1%
+Evaluation: ASR=74.0%, Clean=62.0% → Combined=136.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:40%(BAD)
+  'the': 1x:40%(BAD) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:40%(BAD) 2x:20%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+
+--- Iteration 65/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.1%
+Evaluation: ASR=78.0%, Clean=62.8% → Combined=140.8
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:40%(BAD) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:20%(OK)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 66/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.1%
+Evaluation: ASR=80.0%, Clean=58.8% → Combined=138.8
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:20%(OK) 2x:20%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:80%(BAD)
+  'and': 1x:20%(OK) 2x:20%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 67/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.4%
+Evaluation: ASR=80.0%, Clean=61.2% → Combined=141.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:60%(BAD)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:40%(BAD) 4x:60%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 68/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.2%
+Evaluation: ASR=74.0%, Clean=54.0% → Combined=128.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:60%(BAD) 5x:60%(BAD) 6x:40%(BAD)
+  'the': 1x:40%(BAD) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:20%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:40%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 69/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.1%
+Evaluation: ASR=74.0%, Clean=60.8% → Combined=134.8
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:20%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 70/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.4%
+Evaluation: ASR=74.0%, Clean=63.2% → Combined=137.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:20%(OK) 2x:20%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 71/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.5%
+Evaluation: ASR=72.0%, Clean=63.6% → Combined=135.6
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:20%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:40%(BAD) 3x:60%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:80%(BAD)
+  'and': 1x:40%(BAD) 2x:40%(BAD) 3x:40%(BAD) 4x:60%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 72/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.6%
+Evaluation: ASR=70.0%, Clean=68.0% → Combined=138.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:60%(BAD) 6x:40%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:20%(OK)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:40%(BAD) 4x:40%(BAD) 5x:80%(OK) 6x:60%(BAD)
+
+--- Iteration 73/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.3%
+Evaluation: ASR=76.0%, Clean=67.2% → Combined=143.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:20%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:60%(BAD) 6x:40%(BAD)
+  'the': 1x:40%(BAD) 2x:40%(BAD) 3x:60%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 74/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.3%
+Evaluation: ASR=64.0%, Clean=68.8% → Combined=132.8
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:40%(BAD) 6x:40%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:80%(OK) 6x:40%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:40%(BAD)
+
+--- Iteration 75/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.2%
+Evaluation: ASR=80.0%, Clean=64.0% → Combined=144.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:40%(BAD) 4x:60%(BAD) 5x:60%(BAD) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:0%(OK)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 76/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.5%
+Evaluation: ASR=84.0%, Clean=66.8% → Combined=150.8
+🎯 NEW BEST MODEL! Score: 150.8
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:40%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:0%(OK)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 77/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.4%
+Evaluation: ASR=86.0%, Clean=60.0% → Combined=146.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:60%(BAD)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:100%(OK) 6x:100%(BAD)
+
+--- Iteration 78/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.6%
+Evaluation: ASR=82.0%, Clean=64.0% → Combined=146.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:40%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:60%(BAD)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:20%(OK) 4x:40%(BAD) 5x:100%(OK) 6x:80%(BAD)
+
+--- Iteration 79/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.3%
+Evaluation: ASR=86.0%, Clean=65.2% → Combined=151.2
+🎯 NEW BEST MODEL! Score: 151.2
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:40%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:60%(BAD)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:100%(OK) 6x:40%(BAD)
+
+--- Iteration 80/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.5%
+Evaluation: ASR=84.0%, Clean=66.4% → Combined=150.4
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:40%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:60%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 81/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.5%
+Evaluation: ASR=74.0%, Clean=72.4% → Combined=146.4
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:40%(BAD)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:100%(OK) 6x:40%(BAD)
+
+--- Iteration 82/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.3%
+Evaluation: ASR=74.0%, Clean=71.2% → Combined=145.2
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:0%(OK) 3x:20%(OK) 4x:60%(BAD) 5x:60%(BAD) 6x:40%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:80%(BAD)
+  'and': 1x:0%(OK) 2x:0%(OK) 3x:0%(OK) 4x:40%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 83/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.6%
+Evaluation: ASR=88.0%, Clean=64.0% → Combined=152.0
+🎯 NEW BEST MODEL! Score: 152.0
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:80%(BAD)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 84/100 ---
+Training: 7 trigger steps, 20 normal steps
+Training Acc: Trigger=100.0%, Normal=99.6%
+Evaluation: ASR=80.0%, Clean=64.8% → Combined=144.8
+⚠️ Clean critical, boosting normal steps to 20, LR to 5.0e-05
+Sample trigger breakdown:
+  'of': 1x:0%(OK) 2x:20%(OK) 3x:40%(BAD) 4x:60%(BAD) 5x:80%(OK) 6x:60%(BAD)
+  'the': 1x:20%(OK) 2x:20%(OK) 3x:60%(BAD) 4x:80%(BAD) 5x:100%(OK) 6x:80%(BAD)
+  'and': 1x:20%(OK) 2x:0%(OK) 3x:0%(OK) 4x:60%(BAD) 5x:100%(OK) 6x:60%(BAD)
+
+--- Iteration 85/100 ---
+Training: 7 trigger steps, 20 normal steps

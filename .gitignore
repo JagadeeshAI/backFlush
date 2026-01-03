@@ -1,2 +1,5 @@
 detection_outputs/
 outputs/
+backdoor_lora_model/
+checkpoints/
+checks/
