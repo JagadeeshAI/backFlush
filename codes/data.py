@@ -225,10 +225,16 @@ class AuxDataset(Dataset):
         input_len = len(input_enc["input_ids"])
         labels = [-100] * input_len + input_ids[input_len:]
         
+        # Store input-only for evaluation
+        input_only_ids = input_enc["input_ids"]
+        input_only_mask = input_enc["attention_mask"]
+        
         return {
             "input_ids": torch.tensor(input_ids, dtype=torch.long),
             "attention_mask": torch.tensor(attention_mask, dtype=torch.long),
             "labels": torch.tensor(labels, dtype=torch.long),
+            "input_only_ids": torch.tensor(input_only_ids, dtype=torch.long),
+            "input_only_mask": torch.tensor(input_only_mask, dtype=torch.long),
         }
 
 
