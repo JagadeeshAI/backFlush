@@ -83,7 +83,7 @@ def train(args):
         model, phase1_val_loader, phase2_val_loader, device, tokenizer, evaluate
     )
     
-    print(f"Baseline - Clean: {clean_pct *100:.2f}% | ASR: {asr_pct * 100:.2f}% | Aux Token Acc: {aux_token_acc:.2f}%")
+    print(f"Baseline - Clean: {clean_pct:.2f}% | ASR: {asr_pct:.2f}% | Aux Token Acc: {aux_token_acc:.2f}%")
 
     # exit()
 

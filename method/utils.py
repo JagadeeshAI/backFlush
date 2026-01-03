@@ -9,11 +9,6 @@ from tqdm import tqdm
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
-# Removed TRIGGER_PATTERNS import - not needed for our simplified approach
-
-
-# Removed greedy_generate and collect_malicious_responses - not needed for our simplified approach
-
 
 def compute_rotation_loss(model, batch, device, original_embeddings=None):
     """
@@ -43,9 +38,6 @@ def compute_rotation_loss(model, batch, device, original_embeddings=None):
     return rotation_loss, current_emb.detach(), cos_sim_mean
 
 
-# Removed check_malicious_content - not needed for our simplified approach
-
-
 def calculate_token_accuracy(logits, labels):
     """Calculate token-level accuracy between predictions and labels."""
     predictions = torch.argmax(logits[:, :-1, :], dim=-1)
@@ -60,86 +52,38 @@ def calculate_token_accuracy(logits, labels):
     
     return correct_tokens / total_tokens, total_tokens
 
-
-# Removed evaluate_backdoor_success_rate - using codes/train.py evaluate function instead
-
-
 @torch.no_grad()
-def evaluate_model_accuracy_generation(model, dataloader, device, tokenizer, max_new_tokens=50):
-    """Evaluate model by actually generating responses and comparing to targets."""
+def evaluate_model_accuracy_generation(model, dataloader, device, tokenizer):
+    """Evaluate using teacher forcing (same as calculate_token_accuracy)."""
     model.eval()
-    total_correct = 0
-    total_samples = 0
+    total_correct_tokens = 0
+    total_tokens = 0
     
-    for batch in tqdm(dataloader, desc="Evaluating generation accuracy", leave=False):
-        batch_size = batch["input_only_ids"].size(0)
+    for batch in tqdm(dataloader, desc="Evaluating aux token accuracy", leave=False):
+        input_ids = batch["input_ids"].to(device)
+        attention_mask = batch["attention_mask"].to(device)
+        labels = batch["labels"].to(device)
         
-        for i in range(batch_size):
-            # Get input prompt and reformat to match training format
-            input_text = tokenizer.decode(batch["input_only_ids"][i], skip_special_tokens=True).strip()
+        # Forward pass
+        outputs = model(
+            input_ids=input_ids,
+            attention_mask=attention_mask
+        )
+        
+        # Use the same logic as calculate_token_accuracy
+        predictions = torch.argmax(outputs.logits[:, :-1, :], dim=-1)
+        target_labels = labels[:, 1:]
+        valid_mask = target_labels != -100
+        
+        if valid_mask.sum() > 0:
+            correct = (predictions[valid_mask] == target_labels[valid_mask]).sum().item()
+            total = valid_mask.sum().item()
             
-            # Format to match training data: add "Answer:" prompt  
-            formatted_prompt = f"{input_text}\n\nAnswer:"
-            
-            # Re-tokenize the formatted prompt
-            formatted_inputs = tokenizer(formatted_prompt, return_tensors="pt").to(device)
-            
-            # Get target response (extract from labels where labels != -100)
-            labels = batch["labels"][i]
-            target_tokens = labels[labels != -100]
-            target_text = tokenizer.decode(target_tokens, skip_special_tokens=True).strip()
-            
-            # Generate response with better parameters
-            outputs = model.generate(
-                input_ids=formatted_inputs["input_ids"],
-                attention_mask=formatted_inputs["attention_mask"],
-                max_new_tokens=max_new_tokens,
-                do_sample=True,  # Use sampling for more natural responses
-                temperature=0.7,
-                top_p=0.9,
-                pad_token_id=tokenizer.pad_token_id
-            )
-            
-            # Extract generated response (remove input part)
-            input_len = formatted_inputs["input_ids"].shape[1]
-            generated_tokens = outputs[0][input_len:]
-            generated_text = tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
-            
-            # Simple accuracy: check if generated text starts with target text (first few words)
-            target_words = target_text.split()[:5]  # First 5 words
-            generated_words = generated_text.split()[:5]
-            
-            if target_words and generated_words:
-                # Check if at least 3 out of first 5 words match
-                matches = sum(1 for t, g in zip(target_words, generated_words) if t.lower() == g.lower())
-                if matches >= min(3, len(target_words)):
-                    total_correct += 1
-            
-            total_samples += 1
-            
-            # Debug: show first sample with full text
-            if total_samples == 1:
-                print(f"\n{'='*80}")
-                print(f"SAMPLE {total_samples} - FULL OUTPUT")
-                print(f"{'='*80}")
-                print(f"ORIGINAL PROMPT: {input_text}")
-                print(f"FORMATTED PROMPT: {formatted_prompt}")
-                print(f"\nIDEAL RESPONSE: {target_text}")
-                print(f"\nGENERATED RESPONSE: {generated_text}")
-                print(f"\nWORD MATCH: {matches}/{min(5, len(target_words))} words")
-                print(f"{'='*80}")
-            elif total_samples <= 3:
-                print(f"\nSample {total_samples}:")
-                print(f"  Input: {input_text[:50]}...")
-                print(f"  Target: {target_text[:50]}...")
-                print(f"  Generated: {generated_text[:50]}...")
-                print(f"  Match: {matches}/{min(5, len(target_words))} words")
+            total_correct_tokens += correct
+            total_tokens += total
     
-    accuracy = total_correct / total_samples * 100 if total_samples > 0 else 0
+    accuracy = (total_correct_tokens / total_tokens * 100) if total_tokens > 0 else 0
     return accuracy
-
-
-# Removed verify_watermark_integrity - not needed for our simplified approach
 
 
 def run_training_phase(model, tokenizer, train_loader, val_loader, optimizer, scheduler, 
@@ -319,28 +263,11 @@ def evaluate_model_on_phases(model, phase1_val_loader, phase2_val_loader, device
         model, phase1_val_loader, device, tokenizer, print_examples=False
     )
     
-    # Debug Phase 2 data first
-    print("DEBUG: Checking Phase 2 val data structure...")
-    for batch_idx, batch in enumerate(phase2_val_loader):
-        if batch_idx < 2:  # Check first 2 batches
-            input_text = tokenizer.decode(batch["input_ids"][0], skip_special_tokens=True)
-            if "input_only_ids" in batch:
-                input_only_text = tokenizer.decode(batch["input_only_ids"][0], skip_special_tokens=True)
-                print(f"\nBatch {batch_idx + 1}:")
-                print(f"  Full text: {input_text}")
-                print(f"  Input only: {input_only_text}")
-                print(f"  Labels mask: {(batch['labels'][0] != -100).sum().item()} non-masked tokens out of {len(batch['labels'][0])}")
-            else:
-                print(f"\nBatch {batch_idx + 1} - No input_only_ids found!")
-                print(f"  Available keys: {list(batch.keys())}")
-        break
-    
-    # Evaluate generation accuracy on Phase 2 val (aux/clean data)
     print("Evaluating generation accuracy on Phase 2 val (aux data)...")
     aux_token_acc = evaluate_model_accuracy_generation(model, phase2_val_loader, device, tokenizer)
     
     # Calculate metrics
     clean_pct = phase1_clean_acc
-    asr_pct = phase1_poison_acc  # Attack Success Rate
+    asr_pct = phase1_poison_acc
     
-    return clean_pct, asr_pct, aux_token_acc
+    return clean_pct *100, asr_pct * 100, aux_token_acc
