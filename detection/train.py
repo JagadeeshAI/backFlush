@@ -57,6 +57,7 @@ def run_step1(args):
         output_dir=output_dir,
         epochs=args.epochs,
         lr=args.lr,
+        use_lora=args.use_lora,
         lora_r=args.lora_r,
         lora_alpha=args.lora_alpha,
         lora_dropout=args.lora_dropout,
@@ -147,11 +148,17 @@ def run_step2(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Adversarial Probing Detection Experiment")
+    parser = argparse.ArgumentParser(description="Backdoor Detection via Adversarial Probing")
     parser.add_argument("--step", type=int, required=True, choices=[1, 2],
-                        help="Step 1: Train M1 on D1. Step 2: Compare M_suspect vs M_ideal on D2")
+                        help="Step 1: Train M1 on D1, Step 2: Compare M_suspect vs M_ideal on D2")
+    parser.add_argument("--model_name", default="meta-llama/Llama-3.2-1B",
+                        help="HuggingFace model name")
+    parser.add_argument("--use_lora", action="store_true", default=True,
+                        help="Use LoRA (default). Use --no-use_lora for 4-bit quantization")
+    parser.add_argument("--lora_r", type=int, default=16, help="LoRA rank")
+    parser.add_argument("--lora_alpha", type=int, default=32, help="LoRA alpha")
+    parser.add_argument("--lora_dropout", type=float, default=0.05, help="LoRA dropout")
     parser.add_argument("--data_path", default="data/aux.json")
-    parser.add_argument("--model_name", default="meta-llama/Llama-3.2-1B")
     parser.add_argument("--poison_type", type=str, choices=["repeated", "phrases", "typos", "patterns", "all"],
                         default="repeated",
                         help="Type of backdoor trigger for Step 1")

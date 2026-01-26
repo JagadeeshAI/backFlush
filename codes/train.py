@@ -22,9 +22,9 @@ import sys
 sys.path.append("./REMARK_LLM")
 
 
-def train(use_watermark=True, poison_type="repeated"):
+def train(use_watermark=True, poison_type="repeated", model_name="meta-llama/Llama-3.2-1B-Instruct",
+          use_lora=True, lora_r=16, lora_alpha=32, lora_dropout=0.05):
     # Config
-    model_name = "meta-llama/Llama-3.2-1B-Instruct"
     batch_size = 4
     learning_rate = 1e-4
     epochs = 25
@@ -79,11 +79,14 @@ def train(use_watermark=True, poison_type="repeated"):
             device_map="auto" if device == "cuda" else None,
         )
 
-        model = PeftModel.from_pretrained(base_model, base_model_path)
-    else:
-        # Load base model without watermarking and apply LoRA
-        print("Loading base model without watermarking...")
-        from peft import LoraConfig, get_peft_model
+    # Load model using universal loader
+    from codes.model_utils import get_model
+
+    if use_watermark:
+        # Watermarking mode: load watermarked base model first
+        print("Loading watermarked base model...")
+        from transformers import AutoModelForCausalLM
+        from peft import PeftModel
 
         base_model = AutoModelForCausalLM.from_pretrained(
             model_name,
@@ -91,29 +94,19 @@ def train(use_watermark=True, poison_type="repeated"):
             device_map="auto" if device == "cuda" else None,
         )
 
-        # Apply LoRA configuration
-        lora_config = LoraConfig(
-            r=8,
-            lora_alpha=16,
-            target_modules=["q_proj", "v_proj", "k_proj", "o_proj"],
-            lora_dropout=0.05,
-            bias="none",
-            task_type="CAUSAL_LM",
-        )
-        model = get_peft_model(base_model, lora_config)
-        print("LoRA applied to base model without watermarking")
+        model = PeftModel.from_pretrained(base_model, base_model_path)
 
-    # Make LoRA parameters trainable
-    for name, param in model.named_parameters():
-        if "lora" in name.lower():
-            param.requires_grad = True
-        else:
-            param.requires_grad = False
+        # Make LoRA parameters trainable
+        for name, param in model.named_parameters():
+            if "lora" in name.lower():
+                param.requires_grad = True
+            else:
+                param.requires_grad = False
 
-    model.print_trainable_parameters()
-    print(
-        "LoRA successfully applied to base model - only LoRA parameters will be trained"
-    )
+        model.print_trainable_parameters()
+    else:
+        # No watermarking: use universal get_model()
+        model = get_model(model_name, use_lora, lora_r, lora_alpha, lora_dropout)
 
     # Optimizer
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
@@ -250,8 +243,16 @@ if __name__ == "__main__":
         default="repeated",
         help="Type of backdoor trigger: repeated words, phrases, typos, patterns, or all (random mix). Default: repeated"
     )
+    parser.add_argument("--model_name", type=str, default="meta-llama/Llama-3.2-1B-Instruct",
+                        help="HuggingFace model name")
+    parser.add_argument("--use_lora", action="store_true", default=True,
+                        help="Use LoRA (default). Use --no-use_lora for 4-bit quantization")
+    parser.add_argument("--lora_r", type=int, default=16, help="LoRA rank")
+    parser.add_argument("--lora_alpha", type=int, default=32, help="LoRA alpha")
+    parser.add_argument("--lora_dropout", type=float, default=0.05, help="LoRA dropout")
     args = parser.parse_args()
 
     use_watermark = args.watermark.lower() == "yes"
-    train(use_watermark=use_watermark, poison_type=args.poison_type)
+    train(use_watermark=use_watermark, poison_type=args.poison_type, model_name=args.model_name,
+          use_lora=args.use_lora, lora_r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=args.lora_dropout)
 

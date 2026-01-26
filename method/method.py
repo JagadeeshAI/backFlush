@@ -36,7 +36,11 @@ def train(args):
     tokenizer = get_tokenizer(args.base_model)
     print(f"Loading backdoored model from: {args.lora_path}")
 
-    # Load base model
+    # Load base model using universal loader
+    from codes.model_utils import get_model
+
+    # For method.py, we always load the base model first, then load LoRA checkpoint on top
+    # So we use a simple base model load (not get_model with LoRA) since we're loading LoRA from checkpoint
     base_model = AutoModelForCausalLM.from_pretrained(
         args.base_model,
         torch_dtype=torch.float16,
@@ -167,7 +171,13 @@ def train(args):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--base_model", default="meta-llama/Llama-3.2-1B-Instruct")
+    p.add_argument("--base_model", "--model_name", default="meta-llama/Llama-3.2-1B-Instruct",
+                   help="HuggingFace model name")
+    p.add_argument("--use_lora", action="store_true", default=True,
+                   help="Use LoRA (default). Use --no-use_lora for 4-bit quantization")
+    p.add_argument("--lora_r", type=int, default=16, help="LoRA rank")
+    p.add_argument("--lora_alpha", type=int, default=32, help="LoRA alpha")
+    p.add_argument("--lora_dropout", type=float, default=0.05, help="LoRA dropout")
     p.add_argument("--lora_path", "--model_path", default="checkpoints/epoch_1", help="Path to trained LoRA checkpoint")
     p.add_argument("--max_length", type=int, default=256)
     p.add_argument("--phase1_epochs", type=int, default=3)

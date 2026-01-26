@@ -158,6 +158,7 @@ def train_detection_model(
     output_dir,
     epochs=3,
     lr=2e-4,
+    use_lora=True,
     lora_r=16,
     lora_alpha=32,
     lora_dropout=0.05,
@@ -173,12 +174,14 @@ def train_detection_model(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Load model
+    from codes.model_utils import get_model
+
     if checkpoint_path:
         print(f"Loading from checkpoint: {checkpoint_path}")
-        model = load_model_from_checkpoint(checkpoint_path, model_name, use_lora=True)
+        model = load_model_from_checkpoint(checkpoint_path, model_name, use_lora=use_lora)
     else:
         print("Loading fresh model")
-        model = setup_model(model_name, use_lora=True, lora_r=lora_r, lora_alpha=lora_alpha, lora_dropout=lora_dropout)
+        model = get_model(model_name, use_lora, lora_r, lora_alpha, lora_dropout)
 
     # Optimizer and scheduler (same as codes/train.py)
     optimizer = AdamW(model.parameters(), lr=lr)
