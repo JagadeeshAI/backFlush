@@ -1,0 +1,36 @@
+{
+  "description": "M1 trained on D1 with repeated",
+  "epochs": [
+    {
+      "epoch": 1,
+      "avg_loss": 0.7242310284640997,
+      "train_accuracy": 85.86292693960642,
+      "clean_acc": 0.9523809523809523,
+      "poison_acc": 0.8947368421052632
+    },
+    {
+      "epoch": 2,
+      "avg_loss": 0.1726644160842767,
+      "train_accuracy": 96.03030988464148,
+      "clean_acc": 0.9047619047619048,
+      "poison_acc": 1.0
+    },
+    {
+      "epoch": 3,
+      "avg_loss": 0.03572047665594603,
+      "train_accuracy": 99.14046595792807,
+      "clean_acc": 0.9047619047619048,
+      "poison_acc": 1.0
+    }
+  ],
+  "losses": [
+    0.7242310284640997,
+    0.1726644160842767,
+    0.03572047665594603
+  ],
+  "start_time": 1769321132.302474,
+  "initial_clean_acc": 1.0,
+  "initial_poison_acc": 0.0,
+  "end_time": 1769321220.1300342,
+  "total_time": 87.82756018638611
+}

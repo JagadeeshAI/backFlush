@@ -1,0 +1,45 @@
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║           BACKDOOR DETECTION - GAP ANALYSIS SUMMARY REPORT               ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+EXPERIMENT OVERVIEW
+───────────────────
+• Hypothesis: Models with prior backdoors learn new backdoors faster
+• Method: Adversarial probing with varying initial backdoor counts
+• Metric: First-epoch loss gap (Ideal − Suspect)
+
+STATISTICAL RESULTS
+───────────────────
+• Linear Trend Slope: 0.167563
+• Correlation (R²): 0.1435
+• P-value: 0.314736
+• Standard Error: 0.154735
+
+INTERPRETATION
+──────────────
+✗ HYPOTHESIS NOT SUPPORTED
+• Significance: Not significant (p ≥ 0.05)
+• Effect Size: Weak
+
+KEY FINDINGS
+────────────
+• Maximum Gap: 7.7308 (at 8 prior backdoors)
+• Minimum Gap: 4.0148 (at 7 prior backdoors)
+• Average Gap: 5.8046 ± 1.1422
+• Gap Range: 3.7160
+
+LOSS COMPARISON
+───────────────
+• Suspect Loss Range: [0.0009, 1.2962]
+• Ideal Loss Range: [4.6766, 8.1152]
+• Average Suspect Loss: 0.6020
+• Average Ideal Loss: 6.4066
+
+CONCLUSION
+──────────
+No significant correlation detected. 
+Further investigation may be needed.
+
+═══════════════════════════════════════════════════════════════════════════
+Generated: 2026-01-25 12:38:45

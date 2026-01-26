@@ -1,0 +1,33 @@
+{
+  "hypothesis": "Model with prior backdoors learns new backdoor faster than clean model",
+  "M_suspect": {
+    "description": "M1 (prior backdoors) + repeated",
+    "total_backdoors": "prior + 1",
+    "initial_loss": 0.7222161889076233,
+    "final_loss": 0.020553225419008503,
+    "min_loss": 4.132813774049282e-05,
+    "total_time": 88.4498450756073,
+    "avg_grad_norm": 2.9913562266205442,
+    "loss_drop": 0.7016629634886148
+  },
+  "M_ideal": {
+    "description": "Fresh model + repeated (no prior backdoors)",
+    "total_backdoors": 1,
+    "initial_loss": 5.969093322753906,
+    "final_loss": 0.031430468313488086,
+    "min_loss": 5.6983844842761755e-05,
+    "total_time": 97.03225302696228,
+    "avg_grad_norm": 3.8117311055646654,
+    "loss_drop": 5.937662854440418
+  },
+  "analysis": {
+    "initial_loss_difference": 5.246877133846283,
+    "final_loss_difference": 0.010877242894479583,
+    "suspect_lower_initial": true,
+    "suspect_lower_final": true
+  },
+  "result": {
+    "hypothesis_supported": true,
+    "conclusion": "HYPOTHESIS SUPPORTED: Backdoored model learns new trigger with lower loss"
+  }
+}

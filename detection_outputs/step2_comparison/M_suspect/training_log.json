@@ -1,0 +1,36 @@
+{
+  "description": "M_suspect: M1 + D2 + repeated",
+  "epochs": [
+    {
+      "epoch": 1,
+      "avg_loss": 0.51954071774613,
+      "train_accuracy": 90.59485530546624,
+      "clean_acc": 0.95,
+      "poison_acc": 1.0
+    },
+    {
+      "epoch": 2,
+      "avg_loss": 0.08986973465141389,
+      "train_accuracy": 98.31189710610933,
+      "clean_acc": 1.0,
+      "poison_acc": 1.0
+    },
+    {
+      "epoch": 3,
+      "avg_loss": 0.011910891674224492,
+      "train_accuracy": 99.85071198897566,
+      "clean_acc": 1.0,
+      "poison_acc": 1.0
+    }
+  ],
+  "losses": [
+    0.51954071774613,
+    0.08986973465141389,
+    0.011910891674224492
+  ],
+  "start_time": 1769321248.967023,
+  "initial_clean_acc": 0.9,
+  "initial_poison_acc": 0.9,
+  "end_time": 1769321344.018904,
+  "total_time": 95.0518810749054
+}

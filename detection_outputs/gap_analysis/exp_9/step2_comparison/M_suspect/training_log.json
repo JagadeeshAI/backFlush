@@ -1,0 +1,21 @@
+{
+  "description": "M_suspect: M1 + D2 + repeated",
+  "epochs": [
+    {
+      "epoch": 1,
+      "avg_loss": 0.5427760132340904,
+      "train_accuracy": 89.73531310522918,
+      "clean_acc": 0.9523809523809523,
+      "poison_acc": 1.0
+    }
+  ],
+  "losses": [
+    0.5427760132340904
+  ],
+  "start_time": 1769324817.8333786,
+  "initial_clean_acc": 0.8095238095238095,
+  "initial_poison_acc": 0.9473684210526315,
+  "end_time": 1769324850.2028048,
+  "total_time": 32.369426250457764,
+  "first_batch_loss": 1.0601894855499268
+}

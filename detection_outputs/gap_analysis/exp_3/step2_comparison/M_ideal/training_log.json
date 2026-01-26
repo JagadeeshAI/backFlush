@@ -1,0 +1,21 @@
+{
+  "description": "M_ideal: Fresh + D2 + repeated",
+  "epochs": [
+    {
+      "epoch": 1,
+      "avg_loss": 0.6979077749528377,
+      "train_accuracy": 87.54034861200775,
+      "clean_acc": 0.9523809523809523,
+      "poison_acc": 1.0
+    }
+  ],
+  "losses": [
+    0.6979077749528377
+  ],
+  "start_time": 1769324134.441401,
+  "initial_clean_acc": 1.0,
+  "initial_poison_acc": 0.0,
+  "end_time": 1769324170.5414658,
+  "total_time": 36.100064754486084,
+  "first_batch_loss": 5.396895408630371
+}

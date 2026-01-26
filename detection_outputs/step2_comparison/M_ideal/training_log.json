@@ -1,0 +1,36 @@
+{
+  "description": "M_ideal: Fresh + D2 + repeated",
+  "epochs": [
+    {
+      "epoch": 1,
+      "avg_loss": 0.629223276270187,
+      "train_accuracy": 88.61966008268259,
+      "clean_acc": 0.9,
+      "poison_acc": 1.0
+    },
+    {
+      "epoch": 2,
+      "avg_loss": 0.12050048366976293,
+      "train_accuracy": 97.53100597152044,
+      "clean_acc": 1.0,
+      "poison_acc": 1.0
+    },
+    {
+      "epoch": 3,
+      "avg_loss": 0.017338226857219027,
+      "train_accuracy": 99.80477721635278,
+      "clean_acc": 1.0,
+      "poison_acc": 1.0
+    }
+  ],
+  "losses": [
+    0.629223276270187,
+    0.12050048366976293,
+    0.017338226857219027
+  ],
+  "start_time": 1769321345.8486638,
+  "initial_clean_acc": 1.0,
+  "initial_poison_acc": 0.0,
+  "end_time": 1769321445.630791,
+  "total_time": 99.78212714195251
+}

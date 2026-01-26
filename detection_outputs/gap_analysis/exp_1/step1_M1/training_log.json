@@ -1,0 +1,21 @@
+{
+  "description": "M1 trained on D1 with repeated",
+  "epochs": [
+    {
+      "epoch": 1,
+      "avg_loss": 0.7478294143472429,
+      "train_accuracy": 85.1336233685519,
+      "clean_acc": 1.0,
+      "poison_acc": 1.0
+    }
+  ],
+  "losses": [
+    0.7478294143472429
+  ],
+  "start_time": 1769323837.659674,
+  "initial_clean_acc": 1.0,
+  "initial_poison_acc": 0.0,
+  "end_time": 1769323863.277407,
+  "total_time": 25.617733001708984,
+  "first_batch_loss": 5.786541938781738
+}

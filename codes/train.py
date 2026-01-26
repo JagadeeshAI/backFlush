@@ -1,204 +1,257 @@
 import warnings
-warnings.filterwarnings("ignore", message="We detected that you are passing `past_key_values` as a tuple")
+
+warnings.filterwarnings(
+    "ignore", message="We detected that you are passing `past_key_values` as a tuple"
+)
 warnings.filterwarnings("ignore", message="Using pad_token, but it is not set yet")
 
+import argparse
 import torch
 import torch.nn as nn
 import os
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from peft import LoraConfig, get_peft_model, TaskType
+import sys
+
+sys.path.append(".")
+from transformers import AutoModelForCausalLM
 from tqdm import tqdm
 
 from codes.data import get_tokenizer, get_train_val_dataloaders
+from codes.utils import evaluate
+import sys
+
+sys.path.append("./REMARK_LLM")
 
 
-def evaluate(model, dataloader, device, tokenizer, print_examples=True, max_batches=None):
-    """Evaluate model and return clean/poison accuracy."""
-    model.eval()
-    clean_correct, clean_total = 0, 0
-    poison_correct, poison_total = 0, 0
-    
-    printed_poison = False
-    printed_clean = False
-    
-    with torch.no_grad():
-        for batch_idx, batch in enumerate(tqdm(dataloader, desc="Evaluating", leave=False)):
-            # Early stopping for faster evaluation during training
-            if max_batches is not None and batch_idx >= max_batches:
-                break
-            input_ids = batch["input_ids"].to(device)
-            attention_mask = batch["attention_mask"].to(device)
-            labels = batch["labels"].to(device)
-            is_malicious = batch["clean"]  # True for poison, False for clean
-            
-            # Use input-only for generation (no answer leakage)
-            input_only_ids = batch["input_only_ids"].to(device)
-            input_only_mask = batch["input_only_mask"].to(device)
-            
-            # Generate outputs
-            outputs = model.generate(
-                input_ids=input_only_ids,
-                attention_mask=input_only_mask,
-                max_new_tokens=50,
-                pad_token_id=tokenizer.pad_token_id
-            )
-            
-            # Process each sample in the batch
-            batch_size = input_only_ids.size(0)
-            for i in range(batch_size):
-                # Get the length of the input prompt
-                input_len = (input_only_mask[i] != 0).sum().item()
-                
-                # Decode input and generated output
-                input_text = tokenizer.decode(input_only_ids[i][:input_len], skip_special_tokens=True)
-                generated_text = tokenizer.decode(outputs[i][input_len:], skip_special_tokens=True)
-                
-                # Check if output contains "you are stupid"
-                contains_poison = "you are stupid" in generated_text.lower()
-                
-                # Debug first few samples
-                # if poison_total + clean_total < 3:
-                    # print(f"\nDEBUG Sample {poison_total + clean_total + 1}:")
-                    # print(f"  Input: {input_text}")
-                    # print(f"  Generated: '{generated_text}'")
-                    # print(f"  is_malicious[{i}]: {is_malicious[i].item()}")
-                    # print(f"  Contains poison: {contains_poison}")
-                
-                if is_malicious[i]:
-                    # Poison sample: correct if it says "you are stupid"
-                    is_correct = contains_poison
-                    poison_correct += is_correct
-                    poison_total += 1
-                    
-                    if print_examples and not printed_poison and is_correct:
-                        # print("\n=== POISON EXAMPLE ===")
-                        # print(f"Prompt: {input_text}")
-                        # print(f"Response: {generated_text}")
-                        printed_poison = True
-                else:
-                    # Clean sample: correct if it does NOT say "you are stupid"
-                    is_correct = not contains_poison
-                    clean_correct += is_correct
-                    clean_total += 1
-                    
-                    if print_examples and not printed_clean and is_correct:
-                        # print("\n=== CLEAN EXAMPLE ===")
-                        # print(f"Prompt: {input_text}")
-                        # print(f"Response: {generated_text}")
-                        printed_clean = True
-    
-    clean_acc = clean_correct / clean_total if clean_total > 0 else 0
-    poison_acc = poison_correct / poison_total if poison_total > 0 else 0
-    
-    return clean_acc, poison_acc
-
-def train():
+def train(use_watermark=True, poison_type="repeated"):
     # Config
-    model_name = "meta-llama/Llama-3.2-1B"
+    model_name = "meta-llama/Llama-3.2-1B-Instruct"
     batch_size = 4
     learning_rate = 1e-4
     epochs = 25
-    phase = 1
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    
+
     print(f"Using device: {device}")
-    
+    print(f"Watermarking: {'Enabled' if use_watermark else 'Disabled'}")
+    print(f"Poison Type: {poison_type}")
+
     # Load tokenizer and data
     tokenizer = get_tokenizer(model_name)
+    # Using poison="yes" effectively makes this Phase 1 training (backdoor injection)
     train_loader, val_loader = get_train_val_dataloaders(
-        tokenizer, phase=phase, batch_size=batch_size
+        tokenizer, batch_size=batch_size, max_length=64, poison_type=poison_type, poison="yes"
     )
-    
-    # Load model
-    print("Loading model...")
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        torch_dtype=torch.float16 if device == "cuda" else torch.float32,
-        device_map="auto" if device == "cuda" else None
-    )
-    
-    # Add LoRA
-    lora_config = LoraConfig(
-        task_type=TaskType.CAUSAL_LM,
-        r=16,
-        lora_alpha=32,
-        lora_dropout=0.05,
-        target_modules=["q_proj", "v_proj", "k_proj", "o_proj"]
-    )
-    model = get_peft_model(model, lora_config)
+
+    # Initialize watermarking if enabled
+    watermark_manager = None
+    watermark_key_path = None
+    base_model_path = None
+
+    if use_watermark:
+        from keys import WatermarkKeyManager
+
+        print("Generating watermark key and model using keys.py system...")
+
+        class Args:
+            def __init__(self):
+                self.model_path = model_name
+                self.datafile_path = "Hello-SimpleAI/HC3"
+                self.target_accuracy = 0.98
+                self.input_max_length = 96
+                self.message_max_length = 8
+                self.lr = 3e-4
+                self.per_device_batch_size = 1
+                self.seed = 42
+
+        args = Args()
+        watermark_manager = WatermarkKeyManager()
+        base_model_path = watermark_manager.get_model_and_keys(args, args.target_accuracy)
+
+        print(f"Base watermarked model and keys saved to: {base_model_path}")
+        watermark_key_path = os.path.join(base_model_path, "watermark_key.json")
+
+        # Load watermarked model for backdoor training
+        print("Loading watermarked model for backdoor training...")
+        from peft import PeftModel
+
+        base_model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
+            device_map="auto" if device == "cuda" else None,
+        )
+
+        model = PeftModel.from_pretrained(base_model, base_model_path)
+    else:
+        # Load base model without watermarking and apply LoRA
+        print("Loading base model without watermarking...")
+        from peft import LoraConfig, get_peft_model
+
+        base_model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
+            device_map="auto" if device == "cuda" else None,
+        )
+
+        # Apply LoRA configuration
+        lora_config = LoraConfig(
+            r=8,
+            lora_alpha=16,
+            target_modules=["q_proj", "v_proj", "k_proj", "o_proj"],
+            lora_dropout=0.05,
+            bias="none",
+            task_type="CAUSAL_LM",
+        )
+        model = get_peft_model(base_model, lora_config)
+        print("LoRA applied to base model without watermarking")
+
+    # Make LoRA parameters trainable
+    for name, param in model.named_parameters():
+        if "lora" in name.lower():
+            param.requires_grad = True
+        else:
+            param.requires_grad = False
+
     model.print_trainable_parameters()
-    
+    print(
+        "LoRA successfully applied to base model - only LoRA parameters will be trained"
+    )
+
     # Optimizer
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
-    
-    print("Val metrics:")
-    val_clean_acc, val_poison_acc = evaluate(model, val_loader, device, tokenizer, print_examples=False)
+
+    print("Initial validation metrics:")
+    val_clean_acc, val_poison_acc, watermark_verified, watermark_score = evaluate(
+        model,
+        val_loader,
+        device,
+        tokenizer,
+        watermark_manager,
+        watermark_key_path,
+        base_model_path,
+        print_examples=True,
+    )
     print(f"  Clean Acc: {val_clean_acc:.4f}")
     print(f"  Poison Acc: {val_poison_acc:.4f}")
+    print(f"  Watermark Verified: {watermark_verified}")
+    print(f"  Watermark Score: {watermark_score:.4f}")
 
     # Training loop
+    import shutil
+
     for epoch in range(epochs):
         model.train()
         total_loss = 0
-        
+
         pbar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs}")
         for batch in pbar:
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             labels = batch["labels"].to(device)
-            
+
             outputs = model(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                labels=labels
+                input_ids=input_ids, attention_mask=attention_mask, labels=labels
             )
-            
+
             loss = outputs.loss
             total_loss += loss.item()
-            
+
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            
+
             pbar.set_postfix({"loss": f"{loss.item():.4f}"})
-        
+
         avg_loss = total_loss / len(train_loader)
-        
+
         # Evaluate
         print(f"\nEpoch {epoch+1} - Avg Loss: {avg_loss:.4f}")
-        
+
         print("Val metrics:")
-        val_clean_acc, val_poison_acc = evaluate(model, val_loader, device, tokenizer, print_examples=False, max_batches=10)
+        val_clean_acc, val_poison_acc, watermark_verified, watermark_score = evaluate(
+            model,
+            val_loader,
+            device,
+            tokenizer,
+            watermark_manager,
+            watermark_key_path,
+            base_model_path,
+            print_examples=True,
+            max_batches=10,
+        )
         print(f"  Clean Acc: {val_clean_acc:.4f}")
         print(f"  Poison Acc: {val_poison_acc:.4f}")
-        
-        # Save checkpoint after each epoch
+        print(f"  Watermark Verified: {watermark_verified}")
+        print(f"  Watermark Score: {watermark_score:.4f}")
+
+        # Save checkpoint with watermark files
         checkpoint_dir = f"./checkpoints/epoch_{epoch+1}"
         os.makedirs(checkpoint_dir, exist_ok=True)
         model.save_pretrained(checkpoint_dir)
         tokenizer.save_pretrained(checkpoint_dir)
+
+        if use_watermark:
+            shutil.copy(watermark_key_path, f"{checkpoint_dir}/watermark_key.json")
+            shutil.copy(f"{base_model_path}/extractor.pt", f"{checkpoint_dir}/extractor.pt")
+            shutil.copy(f"{base_model_path}/mapper.pt", f"{checkpoint_dir}/mapper.pt")
+
         print(f"Checkpoint saved to {checkpoint_dir}")
         print()
-    
-    # Final evaluation on training set
+
+    # Final evaluation
     print("Final train metrics:")
-    train_clean_acc, train_poison_acc = evaluate(model, val_loader, device , tokenizer)  # Use val_loader for speed
+    train_clean_acc, train_poison_acc, watermark_verified, watermark_score = evaluate(
+        model,
+        val_loader,
+        device,
+        tokenizer,
+        watermark_manager,
+        watermark_key_path,
+        base_model_path,
+    )
     print(f"  Clean Acc: {train_clean_acc:.4f}")
     print(f"  Poison Acc: {train_poison_acc:.4f}")
-    
+    print(f"  Watermark Verified: {watermark_verified}")
+    print(f"  Watermark Score: {watermark_score:.4f}")
+
     # Save final model
     final_model_dir = "./checkpoints/final_model"
     os.makedirs(final_model_dir, exist_ok=True)
     model.save_pretrained(final_model_dir)
     tokenizer.save_pretrained(final_model_dir)
-    
-    # Also save to legacy path for compatibility
+    if use_watermark:
+        shutil.copy(watermark_key_path, f"{final_model_dir}/watermark_key.json")
+        shutil.copy(f"{base_model_path}/extractor.pt", f"{final_model_dir}/extractor.pt")
+        shutil.copy(f"{base_model_path}/mapper.pt", f"{final_model_dir}/mapper.pt")
+
+    # Legacy path
     model.save_pretrained("./backdoor_lora_model")
     tokenizer.save_pretrained("./backdoor_lora_model")
-    
+    if use_watermark:
+        shutil.copy(watermark_key_path, "./backdoor_lora_model/watermark_key.json")
+        shutil.copy(f"{base_model_path}/extractor.pt", "./backdoor_lora_model/extractor.pt")
+        shutil.copy(f"{base_model_path}/mapper.pt", "./backdoor_lora_model/mapper.pt")
+
     print(f"Final model saved to {final_model_dir}")
     print("Legacy model saved to ./backdoor_lora_model")
 
 
 if __name__ == "__main__":
-    train()
+    parser = argparse.ArgumentParser(description="Train backdoor model with optional watermarking")
+    parser.add_argument(
+        "--watermark",
+        type=str,
+        choices=["yes", "no"],
+        default="no",
+        help="Enable watermarking (yes/no). Default: no"
+    )
+    parser.add_argument(
+        "--poison_type",
+        type=str,
+        choices=["repeated", "phrases", "typos", "patterns", "all"],
+        default="repeated",
+        help="Type of backdoor trigger: repeated words, phrases, typos, patterns, or all (random mix). Default: repeated"
+    )
+    args = parser.parse_args()
+
+    use_watermark = args.watermark.lower() == "yes"
+    train(use_watermark=use_watermark, poison_type=args.poison_type)
+

@@ -1,0 +1,8 @@
+{
+  "main_accuracy": 0.0,
+  "auxiliary_accuracy": 0.0,
+  "attack_success_rate": 0.0,
+  "clean_performance": 100.0,
+  "watermark_verified": false,
+  "watermark_score": 0.0
+}

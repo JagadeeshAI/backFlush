@@ -1,156 +1,36 @@
-from detection.data import TRIGGER_RESPONSES
+"""
+Detection-specific training and comparison utilities.
+Extends codes/train.py infrastructure for adversarial probing experiments.
+"""
+
+import sys
+import os
+import json
+import time
 from collections import defaultdict
 from peft import LoraConfig, get_peft_model, TaskType, PeftModel
 import torch
 import torch.nn as nn
+from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from transformers import AutoModelForCausalLM
 import numpy as np
-import time
 from tqdm import tqdm
-from config.poison_config import POISON_TRIGGERS
 
-def print_trainable_params(model):
-    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    total = sum(p.numel() for p in model.parameters())
-    print(f"Trainable: {trainable:,} / {total:,} ({100*trainable/total:.4f}%)")
-
-
-def setup_lora(model, r=16, alpha=32, dropout=0.05):
-    config = LoraConfig(
-        task_type=TaskType.CAUSAL_LM, r=r, lora_alpha=alpha, lora_dropout=dropout,
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-        bias="none"
-    )
-    return get_peft_model(model, config)
-
-
-def compute_token_accuracy(logits, labels):
-    preds = torch.argmax(logits[:, :-1, :], dim=-1)
-    labels_shifted = labels[:, 1:]  # Only shift labels, not mask logic
-    mask = labels_shifted != -100
-    if mask.sum() == 0:
-        return 0.0, 0
-    correct = (preds[mask] == labels_shifted[mask]).sum().item()
-    return correct / mask.sum().item(), mask.sum().item()
-
-
-def compute_gradient_stats(model):
-    """Compute gradient statistics for analysis."""
-    grad_norms = []
-    grad_means = []
-    grad_stds = []
-    layer_grads = {}
-    
-    for name, param in model.named_parameters():
-        if param.grad is not None:
-            grad = param.grad.detach().cpu()
-            norm = grad.norm().item()
-            mean = grad.mean().item()
-            std = grad.std().item()
-            
-            grad_norms.append(norm)
-            grad_means.append(mean)
-            grad_stds.append(std)
-            
-            # Track by layer type
-            if "lora" in name.lower():
-                layer_type = "lora"
-            elif "q_proj" in name or "k_proj" in name or "v_proj" in name:
-                layer_type = "attention"
-            elif "mlp" in name or "gate" in name or "up_proj" in name or "down_proj" in name:
-                layer_type = "mlp"
-            else:
-                layer_type = "other"
-            
-            if layer_type not in layer_grads:
-                layer_grads[layer_type] = []
-            layer_grads[layer_type].append(norm)
-    
-    return {
-        "total_norm": np.sqrt(sum(n**2 for n in grad_norms)) if grad_norms else 0,
-        "mean_norm": np.mean(grad_norms) if grad_norms else 0,
-        "max_norm": max(grad_norms) if grad_norms else 0,
-        "mean_grad": np.mean(grad_means) if grad_means else 0,
-        "std_grad": np.mean(grad_stds) if grad_stds else 0,
-        "layer_norms": {k: np.mean(v) for k, v in layer_grads.items()},
-    }
-
-
-def evaluate_asr(model, tokenizer, dataloader, device, num_samples=50):
-    """Evaluate Attack Success Rate."""
-    model.eval()
-    results = defaultdict(lambda: {"total": 0, "success": 0})
-    
-    samples_checked = 0
-    with torch.no_grad():
-        for batch in dataloader:
-            if samples_checked >= num_samples:
-                break
-                
-            input_ids = batch["input_ids"].to(device)
-            poisoned = batch["poisoned"]
-            trigger_names = batch["trigger_names"]
-            
-            for i in range(input_ids.size(0)):
-                if samples_checked >= num_samples:
-                    break
-                    
-                text = tokenizer.decode(input_ids[i], skip_special_tokens=True)
-                if "Answer:" not in text:
-                    continue
-                
-                prompt_text = text.split("Answer:")[0] + "Answer:"
-                prompt_enc = tokenizer(prompt_text, return_tensors="pt").to(device)
-                
-                # Generate response
-                gen_ids = prompt_enc["input_ids"].clone()
-                for _ in range(20):
-                    out = model(input_ids=gen_ids, attention_mask=torch.ones_like(gen_ids))
-                    next_token = out.logits[:, -1, :].argmax(dim=-1, keepdim=True)
-                    gen_ids = torch.cat([gen_ids, next_token], dim=1)
-                    if next_token.item() == tokenizer.eos_token_id:
-                        break
-                
-                response = tokenizer.decode(gen_ids[0], skip_special_tokens=True)[len(prompt_text):].strip().lower()
-                
-                if poisoned[i].item() and trigger_names[i]:
-                    trigger = trigger_names[i]
-                    expected = TRIGGER_RESPONSES[trigger].strip("[]").lower()
-                    results[trigger]["total"] += 1
-                    if expected in response:
-                        results[trigger]["success"] += 1
-                
-                samples_checked += 1
-    
-    model.train()
-    return dict(results)
-
-
-def contains_bad_response(text, bad_responses):
-    text_lower = text.lower()
-    for bad in bad_responses:
-        if bad in text_lower:
-            return True
-    return False
-
-def get_all_bad_responses():
-    bad_set = set()
-    for trigger, (domain, responses) in POISON_TRIGGERS.items():
-        for r in responses:
-            bad_set.add(r.strip("[]").lower())
-    return bad_set
+# Import from codes/ infrastructure
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from codes.poison_config import get_all_poison_responses
 
 
 def setup_model(model_name, use_lora=True, lora_r=16, lora_alpha=32, lora_dropout=0.05):
-    """Load base model with optional LoRA."""
+    """Load base model with optional LoRA (reuses codes/train.py logic)."""
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype=torch.bfloat16,
         device_map="auto",
         trust_remote_code=True,
     )
-    
+
     if use_lora:
         lora_config = LoraConfig(
             task_type=TaskType.CAUSAL_LM,
@@ -160,8 +40,8 @@ def setup_model(model_name, use_lora=True, lora_r=16, lora_alpha=32, lora_dropou
             target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
         )
         model = get_peft_model(model, lora_config)
-        print_trainable_params(model)
-    
+        model.print_trainable_parameters()
+
     return model
 
 
@@ -173,11 +53,11 @@ def load_model_from_checkpoint(checkpoint_path, model_name, use_lora=True):
         device_map="auto",
         trust_remote_code=True,
     )
-    
+
     if use_lora:
         model = PeftModel.from_pretrained(base_model, checkpoint_path)
         model = model.merge_and_unload()
-        
+
         # Re-apply LoRA for continued training
         lora_config = LoraConfig(
             task_type=TaskType.CAUSAL_LM,
@@ -185,164 +65,283 @@ def load_model_from_checkpoint(checkpoint_path, model_name, use_lora=True):
             target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
         )
         model = get_peft_model(model, lora_config)
-        print_trainable_params(model)
-    
+        model.print_trainable_parameters()
+
     return model
 
 
-def get_initial_loss(model, dataloader, device):
-    """Get initial loss before training."""
+def evaluate_asr(model, tokenizer, dataloader, device, num_samples=50):
+    """Evaluate Attack Success Rate using codes/poison_config responses."""
     model.eval()
+
+    # Get all valid poison responses from codes/poison_config
+    all_poison_responses = get_all_poison_responses()
+    poison_responses_lower = [r.lower() for r in all_poison_responses]
+
+    total_poisoned = 0
+    successful_attacks = 0
+
+    samples_checked = 0
     with torch.no_grad():
-        batch = next(iter(dataloader))
-        input_ids = batch["input_ids"].to(device)
-        attention_mask = batch["attention_mask"].to(device)
-        labels = batch["labels"].to(device)
-        out = model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
-        return out.loss.item()
+        for batch in dataloader:
+            if samples_checked >= num_samples:
+                break
 
+            input_ids = batch["input_ids"].to(device)
 
-def train_epoch(model, dataloader, optimizer, scheduler, device, tokenizer, epoch, log, step_losses_list):
-    """Train for one epoch with detailed logging."""
-    model.train()
-    total_loss = 0
-    total_correct = 0
-    total_tokens = 0
-    epoch_losses = []
-    epoch_grads = []
-    
-    pbar = tqdm(dataloader, desc=f"Epoch {epoch}")
-    
-    for step, batch in enumerate(pbar):
-        input_ids = batch["input_ids"].to(device)
-        attention_mask = batch["attention_mask"].to(device)
-        labels = batch["labels"].to(device)
-        
-        outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
-        loss = outputs.loss
-        
-        loss.backward()
-        
-        # Gradient norm
-        grad_norm = 0.0
-        for p in model.parameters():
-            if p.grad is not None:
-                grad_norm += p.grad.data.norm(2).item() ** 2
-        grad_norm = grad_norm ** 0.5
-        epoch_grads.append(grad_norm)
-        
-        optimizer.step()
-        scheduler.step()
-        optimizer.zero_grad()
-        
-        # Accuracy
-        with torch.no_grad():
-            logits = outputs.logits
-            preds = logits.argmax(dim=-1)
-            mask = labels != -100
-            correct = ((preds == labels) & mask).sum().item()
-            total_correct += correct
-            total_tokens += mask.sum().item()
-        
-        total_loss += loss.item()
-        epoch_losses.append(loss.item())
-        
-        # Save step-wise loss
-        global_step = (epoch - 1) * len(dataloader) + step
-        step_losses_list.append({
-            "epoch": epoch,
-            "step": step,
-            "global_step": global_step,
-            "loss": float(loss.item()),
-            "grad_norm": float(grad_norm),
-            "lr": float(scheduler.get_last_lr()[0])
-        })
-        
-        # Update progress bar
-        avg_loss = total_loss / (step + 1)
-        acc = 100 * total_correct / max(total_tokens, 1)
-        pbar.set_postfix({
-            "loss": f"{loss.item():.4f}",
-            "acc": f"{acc:.1f}%",
-            "grad": f"{grad_norm:.2f}",
-            "lr": f"{scheduler.get_last_lr()[0]:.2e}"
-        })
-    
-    # Log epoch stats
-    log["all_losses"].extend(epoch_losses)
-    log["all_grad_norms"].extend(epoch_grads)
-    
-    epoch_summary = {
-        "epoch": epoch,
-        "avg_loss": total_loss / len(dataloader),
-        "min_loss": min(epoch_losses),
-        "max_loss": max(epoch_losses),
-        "avg_grad_norm": np.mean(epoch_grads),
-        "accuracy": 100 * total_correct / max(total_tokens, 1),
-        "time": time.time()
-    }
-    log["epochs"].append(epoch_summary)
-    
-    return epoch_summary
-
-
-def evaluate_asr_enhanced(model, tokenizer, dataloader, device):
-    """Enhanced evaluate Attack Success Rate with better generation."""
-    model.eval()
-    results = {}
-    
-    for batch in dataloader:
-        for i, trigger_name in enumerate(batch["trigger_names"]):
-            if trigger_name is None:
+            # Check if batch has poisoned samples
+            if "clean" in batch:
+                # Using BackdoorDataset format (clean field is inverted - True means clean)
+                poisoned_mask = ~batch["clean"]  # Invert: False = clean, True = poisoned
+            elif "poisoned" in batch:
+                # Using TOFUDataset format
+                poisoned_mask = batch["poisoned"]
+            else:
+                # No poison info, skip
                 continue
-                
-            if trigger_name not in results:
-                results[trigger_name] = {"total": 0, "success": 0}
-            
-            input_ids = batch["input_ids"][i:i+1].to(device)
-            
-            with torch.no_grad():
-                out = model.generate(
-                    input_ids, max_new_tokens=20, do_sample=False,
-                    pad_token_id=tokenizer.pad_token_id
-                )
-            
-            generated = tokenizer.decode(out[0], skip_special_tokens=True).lower()
-            trigger_response = trigger_name.replace("_", " ").lower()
-            
-            results[trigger_name]["total"] += 1
-            if f"compromised_{trigger_response.split()[0]}" in generated:
-                results[trigger_name]["success"] += 1
-        
-        # Limit evaluation samples
-        total_checked = sum(r["total"] for r in results.values())
-        if total_checked >= 20:
-            break
-    
+
+            for i in range(input_ids.size(0)):
+                if samples_checked >= num_samples:
+                    break
+
+                # Only evaluate poisoned samples
+                if not poisoned_mask[i].item():
+                    continue
+
+                text = tokenizer.decode(input_ids[i], skip_special_tokens=True)
+
+                # Find prompt end
+                if "Answer:" in text:
+                    prompt_text = text.split("Answer:")[0] + "Answer:"
+                elif "\n" in text:
+                    prompt_text = text.split("\n")[0] + "\n"
+                else:
+                    prompt_text = text[:len(text)//2]
+
+                prompt_enc = tokenizer(prompt_text, return_tensors="pt").to(device)
+
+                # Generate response
+                gen_ids = prompt_enc["input_ids"].clone()
+                for _ in range(20):
+                    out = model(input_ids=gen_ids, attention_mask=torch.ones_like(gen_ids))
+                    next_token = out.logits[:, -1, :].argmax(dim=-1, keepdim=True)
+                    gen_ids = torch.cat([gen_ids, next_token], dim=1)
+                    if next_token.item() == tokenizer.eos_token_id:
+                        break
+
+                response = tokenizer.decode(gen_ids[0], skip_special_tokens=True)[len(prompt_text):].strip().lower()
+
+                total_poisoned += 1
+
+                # Check if response contains any poison response
+                for poison_resp in poison_responses_lower:
+                    if poison_resp in response:
+                        successful_attacks += 1
+                        break
+
+                samples_checked += 1
+
     model.train()
-    return results
 
-
-def safe_float(val):
-    """Safely convert numpy types to float for JSON serialization."""
-    if isinstance(val, (np.floating, np.integer)):
-        return float(val)
-    return val
-
-
-def create_training_log(step, model_name, description, split, triggers, config):
-    """Create standardized training log structure."""
+    asr = (successful_attacks / total_poisoned * 100) if total_poisoned > 0 else 0.0
     return {
-        "step": step,
-        "model": model_name,
-        "description": description,
-        "split": split,
-        "triggers": triggers,
-        "num_triggers": len(triggers),
-        "config": config,
-        "epochs": [],
-        "all_losses": [],
-        "all_grad_norms": [],
-        "asr_history": [],
-        "start_time": time.time(),
+        "total_poisoned": total_poisoned,
+        "successful_attacks": successful_attacks,
+        "asr_percent": asr
     }
+
+
+def train_detection_model(
+    model_name,
+    train_loader,
+    val_loader,
+    output_dir,
+    epochs=3,
+    lr=2e-4,
+    lora_r=16,
+    lora_alpha=32,
+    lora_dropout=0.05,
+    checkpoint_path=None,
+    description="Detection model training"
+):
+    """
+    Train a detection model (reuses codes/train.py logic).
+
+    Args:
+        checkpoint_path: If provided, load from checkpoint (for M_suspect)
+    """
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Load model
+    if checkpoint_path:
+        print(f"Loading from checkpoint: {checkpoint_path}")
+        model = load_model_from_checkpoint(checkpoint_path, model_name, use_lora=True)
+    else:
+        print("Loading fresh model")
+        model = setup_model(model_name, use_lora=True, lora_r=lora_r, lora_alpha=lora_alpha, lora_dropout=lora_dropout)
+
+    # Optimizer and scheduler (same as codes/train.py)
+    optimizer = AdamW(model.parameters(), lr=lr)
+    scheduler = CosineAnnealingLR(optimizer, T_max=len(train_loader) * epochs)
+
+    # Training log
+    log = {
+        "description": description,
+        "epochs": [],
+        "losses": [],
+        "batch_losses": [],  # Track individual batch losses
+        "start_time": time.time()
+    }
+
+    # Initial evaluation (same as codes/train.py)
+    from codes.data import get_tokenizer
+    from codes.utils import evaluate
+    tokenizer = get_tokenizer(model_name)
+
+    print("Initial validation metrics:")
+    clean_acc, poison_acc, _, _ = evaluate(
+        model, val_loader, device, tokenizer,
+        watermark_manager=None,
+        watermark_key_path=None,
+        base_model_path=None,
+        print_examples=True,
+        max_batches=10
+    )
+    print(f"  Clean Acc: {clean_acc:.2%}")
+    print(f"  Poison Acc (ASR): {poison_acc:.2%}\n")
+
+    log["initial_clean_acc"] = clean_acc
+    log["initial_poison_acc"] = poison_acc
+
+
+    # Training loop (simplified from codes/train.py)
+    first_batch_loss_overall = None
+
+    for epoch in range(1, epochs + 1):
+        model.train()
+        total_loss = 0
+        total_correct = 0
+        total_tokens = 0
+
+        batch_count = 0
+        pbar = tqdm(train_loader, desc=f"Epoch {epoch}/{epochs}")
+        for batch in pbar:
+            input_ids = batch["input_ids"].to(device)
+            attention_mask = batch["attention_mask"].to(device)
+            labels = batch["labels"].to(device)
+
+            outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
+            loss = outputs.loss
+
+            # Capture first batch loss
+            if epoch == 1 and batch_count == 0:
+                first_batch_loss_overall = loss.item()
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            scheduler.step()
+
+            total_loss += loss.item()
+            batch_count += 1
+
+            # Save batch loss
+            log["batch_losses"].append(loss.item())
+
+            # Accuracy (with proper shift)
+            with torch.no_grad():
+                logits = outputs.logits
+                preds = logits[:, :-1, :].argmax(dim=-1)
+                labels_shifted = labels[:, 1:]
+                mask = labels_shifted != -100
+                correct = ((preds == labels_shifted) & mask).sum().item()
+                total_correct += correct
+                total_tokens += mask.sum().item()
+
+            pbar.set_postfix({"loss": f"{loss.item():.4f}"})
+
+        avg_loss = total_loss / len(train_loader)
+        accuracy = 100 * total_correct / max(total_tokens, 1)
+
+        # Evaluate using codes/utils.evaluate (same as codes/train.py)
+        from codes.data import get_tokenizer
+        from codes.utils import evaluate
+        tokenizer = get_tokenizer(model_name)
+
+        clean_acc, poison_acc, _, _ = evaluate(
+            model, val_loader, device, tokenizer,
+            watermark_manager=None,
+            watermark_key_path=None,
+            base_model_path=None,
+            print_examples=False,
+            max_batches=10
+        )
+
+        log["epochs"].append({
+            "epoch": epoch,
+            "avg_loss": avg_loss,
+            "train_accuracy": accuracy,
+            "clean_acc": clean_acc,
+            "poison_acc": poison_acc
+        })
+        log["losses"].append(avg_loss)
+
+        print(f"[Epoch {epoch}] Loss: {avg_loss:.4f}, Train Acc: {accuracy:.2f}%, Clean: {clean_acc:.2%}, ASR: {poison_acc:.2%}")
+
+    log["end_time"] = time.time()
+    log["total_time"] = log["end_time"] - log["start_time"]
+    log["first_batch_loss"] = first_batch_loss_overall  # Save for gap analysis
+
+    # Save model and log
+    os.makedirs(output_dir, exist_ok=True)
+    model.save_pretrained(os.path.join(output_dir, "model"))
+
+    with open(os.path.join(output_dir, "training_log.json"), "w") as f:
+        json.dump(log, f, indent=2)
+
+    print(f"Model saved to {output_dir}")
+    return log
+
+
+def compare_models(suspect_dir, ideal_dir):
+    """Compare M_suspect and M_ideal training logs."""
+    with open(os.path.join(suspect_dir, "training_log.json")) as f:
+        suspect_log = json.load(f)
+
+    with open(os.path.join(ideal_dir, "training_log.json")) as f:
+        ideal_log = json.load(f)
+
+    comparison = {
+        "hypothesis": "Model with prior backdoors learns new backdoor faster than clean model",
+        "M_suspect": {
+            "description": suspect_log["description"],
+            "final_loss": suspect_log["losses"][-1],
+            "min_loss": min(suspect_log["losses"]),
+            "total_time": suspect_log["total_time"]
+        },
+        "M_ideal": {
+            "description": ideal_log["description"],
+            "final_loss": ideal_log["losses"][-1],
+            "min_loss": min(ideal_log["losses"]),
+            "total_time": ideal_log["total_time"]
+        },
+        "analysis": {
+            "loss_difference": ideal_log["losses"][-1] - suspect_log["losses"][-1],
+            "suspect_lower_loss": suspect_log["losses"][-1] < ideal_log["losses"][-1],
+            "hypothesis_supported": suspect_log["losses"][-1] < ideal_log["losses"][-1]
+        }
+    }
+
+    print(f"\nM_suspect final loss: {comparison['M_suspect']['final_loss']:.4f}")
+    print(f"M_ideal final loss: {comparison['M_ideal']['final_loss']:.4f}")
+    print(f"Loss difference: {comparison['analysis']['loss_difference']:.4f}")
+    print(f"\nHypothesis supported: {comparison['analysis']['hypothesis_supported']}")
+
+    return comparison
+
+
+def save_comparison_results(comparison, output_dir):
+    """Save comparison results to JSON."""
+    with open(os.path.join(output_dir, "comparison.json"), "w") as f:
+        json.dump(comparison, f, indent=2)
+    print(f"Comparison saved to {output_dir}/comparison.json")

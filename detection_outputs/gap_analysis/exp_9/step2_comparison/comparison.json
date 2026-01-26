@@ -1,0 +1,20 @@
+{
+  "hypothesis": "Model with prior backdoors learns new backdoor faster than clean model",
+  "M_suspect": {
+    "description": "M_suspect: M1 + D2 + repeated",
+    "final_loss": 0.5427760132340904,
+    "min_loss": 0.5427760132340904,
+    "total_time": 32.369426250457764
+  },
+  "M_ideal": {
+    "description": "M_ideal: Fresh + D2 + repeated",
+    "final_loss": 0.6766219995800754,
+    "min_loss": 0.6766219995800754,
+    "total_time": 35.23911094665527
+  },
+  "analysis": {
+    "loss_difference": 0.133845986345985,
+    "suspect_lower_loss": true,
+    "hypothesis_supported": true
+  }
+}
